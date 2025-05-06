@@ -1,0 +1,53 @@
+<div data-view="layouts/main">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ title }}</h2>
+        </div>
+        <div class="card-body">
+            <!-- Flash messages for form -->
+            <div data-template data-var="flash">
+                <div class="alert alert-{{ item.type }}">{{ item.message }}</div>
+            </div>
+            
+            <form action="/contact" method="POST">
+                <!-- CSRF Token -->
+                {{ csrf_field() }}
+                
+                <div class="form-group">
+                    <label class="form-label" for="name">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}">
+                    
+                    <!-- Show validation errors if present -->
+                    <div data-template data-var="errors.name">
+                        <div class="invalid-feedback">{{ item }}</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}">
+                    
+                    <!-- Show validation errors if present -->
+                    <div data-template data-var="errors.email">
+                        <div class="invalid-feedback">{{ item }}</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="message">Message</label>
+                    <textarea class="form-control" id="message" name="message" rows="5">{{ old('message') }}</textarea>
+                    
+                    <!-- Show validation errors if present -->
+                    <div data-template data-var="errors.message">
+                        <div class="invalid-feedback">{{ item }}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                    <a href="/" class="btn btn-secondary">Back to Home</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

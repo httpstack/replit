@@ -1,0 +1,50 @@
+<div data-view="layouts/main">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ title }}</h2>
+        </div>
+        <div class="card-body">
+            <p>{{ message }}</p>
+            
+            <h3>Key Features</h3>
+            <ul class="list-group">
+                <div data-template data-var="features">
+                    <li class="list-group-item">{{ item }}</li>
+                </div>
+            </ul>
+            
+            <div style="margin-top: 1.5rem;">
+                <a href="/about" class="btn btn-primary">Learn More</a>
+                <a href="/contact" class="btn btn-secondary">Contact Us</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3>Getting Started</h3>
+        </div>
+        <div class="card-body">
+            <p>To customize this framework, you can:</p>
+            <ol>
+                <li>Define your routes in <code>routes/web.php</code></li>
+                <li>Create controllers in <code>app/Controllers/</code></li>
+                <li>Create models in <code>app/Models/</code></li>
+                <li>Create views in <code>templates/</code></li>
+                <li>Configure the application in <code>config/app.php</code></li>
+            </ol>
+            
+            <h4>Example Route</h4>
+            <pre><code>$router->get('/hello/{name}', function ($name) {
+    return view('hello', ['name' => $name]);
+});</code></pre>
+            
+            <h4>Example Controller Method</h4>
+            <pre><code>public function show($id)
+{
+    $item = $this->itemService->find($id);
+    return $this->view('items/show', ['item' => $item]);
+}</code></pre>
+        </div>
+    </div>
+</div>
