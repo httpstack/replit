@@ -230,6 +230,33 @@ class Request
     }
     
     /**
+     * Get a query parameter (GET)
+     * 
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getQuery(string $key, $default = null): mixed
+    {
+        return $_GET[$key] ?? $default;
+    }
+    
+    /**
+     * Get a post parameter (POST)
+     * 
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getPost(string $key = null, $default = null): mixed
+    {
+        if ($key === null) {
+            return $_POST;
+        }
+        return $_POST[$key] ?? $default;
+    }
+    
+    /**
      * Check if a parameter exists
      * 
      * @param string $key
