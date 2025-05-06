@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ title }}</h1>
+        
+        <p>Total JSON users: {{ count }}</p>
+        
+        <div class="search-box">
+            <form action="/users/search" method="get">
+                <input type="text" name="q" placeholder="Search by name..." value="{{ query }}">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        
+        <div class="action-links">
+            <a href="/users" class="btn">View Database Users</a>
+        </div>
+        
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- The following would be looped for each user in PHP -->
+                <!-- Begin user loop -->
+                <tr>
+                    <td>1</td>
+                    <td>John Doe</td>
+                    <td>john@example.com</td>
+                    <td>admin</td>
+                    <td>2025-04-15T10:30:00Z</td>
+                </tr>
+                <!-- End user loop -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

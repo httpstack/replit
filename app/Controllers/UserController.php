@@ -93,7 +93,10 @@ class UserController extends BaseController
             );
             
             if (!$user) {
-                return $this->notFound('User not found');
+                return $this->view('errors/404', [
+                    'title' => 'User Not Found',
+                    'message' => 'The requested user could not be found'
+                ], 404);
             }
             
             return $this->view('users/show', [

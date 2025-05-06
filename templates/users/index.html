@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ title }}</h1>
+        
+        <p>Total users: {{ count }}</p>
+        
+        <div class="action-links">
+            <a href="/users/create" class="btn">Add New User</a>
+            <a href="/users/json" class="btn">View JSON Users</a>
+        </div>
+        
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- The following would be looped for each user in PHP -->
+                <!-- Begin user loop -->
+                <tr>
+                    <td>1</td>
+                    <td>John Doe</td>
+                    <td>john@example.com</td>
+                    <td>2025-05-01 10:30:00</td>
+                    <td>
+                        <a href="/users/1" class="btn-small">View</a>
+                        <a href="/users/1/edit" class="btn-small">Edit</a>
+                    </td>
+                </tr>
+                <!-- End user loop -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

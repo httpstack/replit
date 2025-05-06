@@ -7,6 +7,7 @@
  */
 
 use App\Controllers\HomeController;
+use App\Controllers\UserController;
 use App\Middleware\ExampleMiddleware;
 use Framework\Routing\Router;
 
@@ -83,6 +84,35 @@ $router->get('/post/{slug?}', function ($slug = null) {
 // Define routes with HTTP methods
 $router->post('/contact', [HomeController::class, 'contact'])->name('contact.submit');
 $router->get('/contact', [HomeController::class, 'contact'])->name('contact');
+
+// User routes
+$router->group(['prefix' => 'users'], function (Router $router) {
+    // List all users from database (MySQL example)
+    $router->get('/', [UserController::class, 'index'])->name('users.index');
+    
+    // Show the create user form
+    $router->get('/create', function() {
+        return view('users/create', [
+            'title' => 'Create User',
+            'errors' => [],
+            'data' => []
+        ]);
+    })->name('users.create');
+    
+    // Process the new user form submission
+    $router->post('/', [UserController::class, 'store'])->name('users.store');
+    
+    // Get users from JSON data source
+    $router->get('/json', [UserController::class, 'jsonUsers'])->name('users.json');
+    
+    // Search users from JSON data source
+    $router->get('/search', [UserController::class, 'searchJson'])->name('users.search');
+    
+    // Show a single user
+    $router->get('/{id}', [UserController::class, 'show'])
+        ->where('id', '[0-9]+')  // using the where() method for constraints
+        ->name('users.show');
+});
 
 // 404 fallback route
 $router->any('{any}', function () {
