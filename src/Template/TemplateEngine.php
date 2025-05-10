@@ -298,7 +298,7 @@ class TemplateEngine
             } catch (FrameworkException $e) {
                 // If view not found, add an error comment
                 $comment = $this->dom->createComment("View Error: {$e->getMessage()}");
-                $element->innerHTML = '';
+                $element->textContent = '';
                 $element->appendChild($comment);
             }
             
@@ -336,7 +336,7 @@ class TemplateEngine
                             if ($tagName === 'input' || $tagName === 'textarea' || $tagName === 'select') {
                                 $boundElement->setAttribute('value', (string)$value);
                             } else {
-                                $boundElement->innerHTML = (string)$value;
+                                $boundElement->textContent = (string)$value;
                             }
                             
                             // Remove the data-bind attribute
