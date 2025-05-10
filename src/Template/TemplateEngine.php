@@ -240,7 +240,9 @@ class TemplateEngine
                     
                     // Replace variables in the template content
                     foreach ($localVars as $k => $v) {
-                        $itemContent = preg_replace('/\{\{\s*' . preg_quote($k, '/') . '\s*\}\}/i', $v, $itemContent);
+                        if (is_scalar($v)) {
+                            $itemContent = preg_replace('/\{\{\s*' . preg_quote($k, '/') . '\s*\}\}/i', (string)$v, $itemContent);
+                        }
                         
                         if (is_array($v) || is_object($v)) {
                             $itemContent = $this->replaceComplexVariables($k, $v, $itemContent);
@@ -410,7 +412,7 @@ class TemplateEngine
                 $pattern = '/\{\{\s*' . preg_quote($prefix, '/') . '\.' . preg_quote($key, '/') . '\s*\}\}/i';
                 
                 if (is_scalar($val)) {
-                    $content = preg_replace($pattern, $val, $content);
+                    $content = preg_replace($pattern, (string)$val, $content);
                 } elseif (is_array($val) || is_object($val)) {
                     $nestedPrefix = $prefix . '.' . $key;
                     $content = $this->replaceComplexVariables($nestedPrefix, $val, $content);

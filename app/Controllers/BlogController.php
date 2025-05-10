@@ -6,6 +6,7 @@ use Framework\Controller\BaseController;
 use Framework\Http\Request;
 use Framework\Http\Response;
 use Framework\Data\JsonDataSource;
+use Framework\Container\Container;
 
 /**
  * Blog Controller
@@ -23,11 +24,17 @@ class BlogController extends BaseController
     
     /**
      * Create a new controller instance
+     * 
+     * @param Container $container
      */
-    public function __construct()
+    public function __construct(Container $container)
     {
-        // Initialize posts from a JSON file
-        $this->posts = new JsonDataSource('data/blog_posts.json');
+        // Call the parent constructor to set up the template engine
+        parent::__construct($container);
+        
+        // Initialize posts from a JSON file - use the full path from project root
+        $rootDir = dirname(dirname(__DIR__));
+        $this->posts = new JsonDataSource($rootDir . '/data/blog_posts.json');
     }
     
     /**

@@ -226,7 +226,9 @@ class Container
         }
         
         try {
-            return $this->make($type->getName());
+            // Use the ReflectionNamedType API which works in PHP 7.4+
+            $typeName = $type instanceof \ReflectionNamedType ? $type->getName() : (string)$type;
+            return $this->make($typeName);
         } catch (FrameworkException $e) {
             // If we can't resolve the class but the parameter is optional, 
             // use the default value
@@ -271,15 +273,17 @@ class Container
     public function call($callback, array $parameters = []): mixed
     {
         if (is_array($callback)) {
+            // If the first element is a string (class name), instantiate it
+            if (is_string($callback[0])) {
+                $callback[0] = $this->make($callback[0]);
+            }
+            
             $reflectionMethod = new \ReflectionMethod($callback[0], $callback[1]);
             $dependencies = $reflectionMethod->getParameters();
             
             $parameters = $this->resolveDependencies($dependencies, $parameters);
             
-            return $reflectionMethod->invokeArgs(
-                is_string($callback[0]) ? null : $callback[0], 
-                $parameters
-            );
+            return $reflectionMethod->invokeArgs($callback[0], $parameters);
         }
         
         if ($callback instanceof Closure) {
