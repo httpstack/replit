@@ -8,6 +8,7 @@
 
 use App\Controllers\HomeController;
 use App\Controllers\UserController;
+use App\Controllers\BlogController;
 use App\Middleware\ExampleMiddleware;
 use Framework\Routing\Router;
 
@@ -84,6 +85,23 @@ $router->get('/post/{slug?}', function ($slug = null) {
 // Define routes with HTTP methods
 $router->post('/contact', [HomeController::class, 'contact'])->name('contact.submit');
 $router->get('/contact', [HomeController::class, 'contact'])->name('contact');
+
+// Blog routes
+$router->group(['prefix' => 'blog'], function (Router $router) {
+    // Blog home page
+    $router->get('/', [BlogController::class, 'index'])->name('blog.index');
+    
+    // Search blog posts
+    $router->get('/search', [BlogController::class, 'search'])->name('blog.search');
+    
+    // View posts by category
+    $router->get('/category/{category}', [BlogController::class, 'category'])->name('blog.category');
+    
+    // View individual blog post (must be last to avoid conflicts)
+    $router->get('/{slug}', [BlogController::class, 'show'])
+        ->where('slug', '[a-z0-9\-]+')
+        ->name('blog.show');
+});
 
 // User routes
 $router->group(['prefix' => 'users'], function (Router $router) {
