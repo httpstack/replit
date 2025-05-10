@@ -1,0 +1,44 @@
+<div data-view="layouts/main">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ post.title }}</h2>
+            <div style="display: flex; justify-content: space-between; color: #666;">
+                <div>
+                    <span>By {{ post.author }}</span> | 
+                    <span>Category: <a href="/blog/category/{{ post.category }}">{{ post.category }}</a></span>
+                </div>
+                <span>Published: {{ post.published_at }}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="post-content" style="margin-bottom: 30px; line-height: 1.8;">
+                <p>{{ post.content }}</p>
+            </div>
+            
+            <div class="tags" style="margin-bottom: 20px;">
+                <strong>Tags:</strong>
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <div data-template data-var="post.tags">
+                        <span class="tag" style="background: #f0f0f0; padding: 3px 8px; border-radius: 10px; font-size: 0.8rem;">{{ item }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <a href="/blog" class="btn btn-secondary">Back to Blog</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card" style="margin-top: 20px;">
+        <div class="card-header">
+            <h3>Related Posts</h3>
+        </div>
+        <div class="card-body">
+            <p>Discover more articles about {{ post.category }}:</p>
+            <ul>
+                <li><a href="/blog/category/{{ post.category }}">View all in {{ post.category }}</a></li>
+            </ul>
+        </div>
+    </div>
+</div>

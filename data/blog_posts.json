@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "title": "Getting Started with Our PHP Framework",
+    "slug": "getting-started",
+    "author": "John Developer",
+    "category": "tutorials",
+    "published_at": "2025-05-01T10:00:00Z",
+    "content": "Welcome to our PHP MVC Framework! This framework is designed to make building web applications simple and enjoyable. In this post, we'll cover the basics of setting up your first project and understanding the core concepts.\n\nThe framework follows the Model-View-Controller (MVC) pattern, providing a clean separation of concerns for your application. The routing system makes it easy to define how your application responds to different URLs and HTTP methods.\n\nTo get started, simply clone the repository, run composer install, and you're ready to go!",
+    "tags": ["php", "mvc", "tutorial"]
+  },
+  {
+    "id": 2,
+    "title": "Advanced Routing Techniques",
+    "slug": "advanced-routing",
+    "author": "Jane Coder",
+    "category": "tutorials",
+    "published_at": "2025-05-03T14:30:00Z",
+    "content": "The routing system in our framework is powerful and flexible. In this post, we'll explore some advanced techniques for organizing your routes.\n\nRoute groups allow you to apply middleware or prefixes to multiple routes at once. Parameter constraints let you define patterns that parameters must match. Named routes make it easy to generate URLs in your views and controllers.\n\nBy using these techniques, you can create a clean, organized routing structure for even the most complex applications.",
+    "tags": ["routing", "middleware", "php"]
+  },
+  {
+    "id": 3,
+    "title": "Working with JSON Data Sources",
+    "slug": "json-data-sources",
+    "author": "John Developer",
+    "category": "data",
+    "published_at": "2025-05-05T09:15:00Z",
+    "content": "Not all applications need a traditional database. Our framework provides a JsonDataSource class that makes it easy to work with JSON files as data storage.\n\nThis approach is perfect for small to medium applications, static sites, or prototyping. The JsonDataSource class provides methods for querying, filtering, and manipulating data in a way that feels familiar to anyone who's worked with databases.\n\nIn this post, we'll explore how to effectively use this feature in your projects.",
+    "tags": ["json", "data", "storage"]
+  },
+  {
+    "id": 4,
+    "title": "Creating Custom Middleware",
+    "slug": "custom-middleware",
+    "author": "Jane Coder",
+    "category": "security",
+    "published_at": "2025-05-08T16:45:00Z",
+    "content": "Middleware plays a crucial role in modern web applications. It allows you to filter HTTP requests entering your application, perfect for tasks like authentication, logging, CSRF protection, and more.\n\nIn this tutorial, we'll learn how to create custom middleware for our framework. We'll build a simple authentication middleware that protects routes from unauthorized access, and a logging middleware that records all requests to your application.\n\nBy the end, you'll have a solid understanding of how middleware works and how to implement your own.",
+    "tags": ["middleware", "security", "authentication"]
+  }
+]

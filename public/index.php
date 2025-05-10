@@ -13,6 +13,7 @@ require BASE_PATH . '/vendor/autoload.php';
 
 // Bootstrap the application
 $app = require_once BASE_PATH . '/src/Core/Bootstrap.php';
-
+$router = $app->get('router');
+$router->get("/home", ["App\Controllers\HomeController","index"]);
 // Run the application
 $app->run();

@@ -1,0 +1,46 @@
+<div data-view="layouts/main">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ title }}: "{{ query }}"</h2>
+            <p>Found {{ post_count }} results</p>
+        </div>
+        <div class="card-body">
+            <div class="search-box">
+                <form action="/blog/search" method="get">
+                    <div class="form-group" style="display: flex; gap: 10px;">
+                        <input type="text" name="q" value="{{ query }}" placeholder="Search posts..." class="form-control">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="posts">
+                <div data-template data-var="posts">
+                    <div class="card" style="border: 1px solid #eee; margin-bottom: 20px;">
+                        <div class="card-header">
+                            <h3><a href="/blog/{{ item.slug }}" style="text-decoration: none;">{{ item.title }}</a></h3>
+                            <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.9rem;">
+                                <span>By {{ item.author }}</span>
+                                <span>{{ item.published_at }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>{{ item.content | truncate(150) }}...</p>
+                            <a href="/blog/{{ item.slug }}" class="btn btn-primary">Read More</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div data-if="{{ post_count == 0 }}">
+                    <div class="alert alert-info">
+                        <p>No posts found matching "{{ query }}".</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions" style="margin-top: 20px;">
+                <a href="/blog" class="btn btn-secondary">Back to Blog</a>
+            </div>
+        </div>
+    </div>
+</div>

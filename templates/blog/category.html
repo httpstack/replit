@@ -1,0 +1,47 @@
+<div data-view="layouts/main">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ title }}</h2>
+            <p>Total posts in this category: {{ post_count }}</p>
+        </div>
+        <div class="card-body">
+            <div class="categories" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <a href="/blog" class="btn btn-secondary">All Posts</a>
+                <a href="/blog/category/tutorials" class="btn btn-secondary">Tutorials</a>
+                <a href="/blog/category/data" class="btn btn-secondary">Data</a>
+                <a href="/blog/category/security" class="btn btn-secondary">Security</a>
+            </div>
+            
+            <div class="posts">
+                <div data-template data-var="posts">
+                    <div class="card" style="border: 1px solid #eee; margin-bottom: 20px;">
+                        <div class="card-header">
+                            <h3><a href="/blog/{{ item.slug }}" style="text-decoration: none;">{{ item.title }}</a></h3>
+                            <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.9rem;">
+                                <span>By {{ item.author }}</span>
+                                <span>{{ item.published_at }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>{{ item.content | truncate(150) }}...</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <a href="/blog/{{ item.slug }}" class="btn btn-primary">Read More</a>
+                                <div class="tag-list" style="display: flex; gap: 5px;">
+                                    <div data-template data-var="item.tags">
+                                        <span class="tag" style="background: #f0f0f0; padding: 3px 8px; border-radius: 10px; font-size: 0.8rem;">{{ item }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div data-if="{{ post_count == 0 }}">
+                    <div class="alert alert-info">
+                        <p>No posts found in the {{ category }} category.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
