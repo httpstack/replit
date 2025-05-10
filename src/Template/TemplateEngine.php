@@ -223,10 +223,11 @@ class TemplateEngine
             
             if ($varName && isset($this->variables[$varName]) && is_array($this->variables[$varName])) {
                 $items = $this->variables[$varName];
-                $templateContent = $element->innerHTML;
+                // Get the template content as text
+                $templateContent = $element->textContent;
                 
                 // Clear the element's content
-                $element->innerHTML = '';
+                $element->textContent = '';
                 
                 foreach ($items as $key => $item) {
                     $itemContent = $templateContent;
@@ -292,7 +293,7 @@ class TemplateEngine
                 $fragment = $this->dom->createFragment($viewContent);
                 
                 // Replace the element's content with the fragment
-                $element->innerHTML = '';
+                $element->textContent = '';
                 $element->appendChild($fragment);
             } catch (FrameworkException $e) {
                 // If view not found, add an error comment

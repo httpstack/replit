@@ -33,9 +33,47 @@ class DomManipulator extends DOMDocument
         parent::__construct($version, $encoding);
         
         // Configure DOMDocument to handle HTML5 and special characters
-        $this->registerNodeClass('DOMElement', DOMElement::class);
         $this->formatOutput = true;
         $this->preserveWhiteSpace = false;
+        
+        // Add innerHTML property to DOMElement objects
+        $this->registerNodeClass('DOMElement', \DOMElement::class);
+    }
+    
+    /**
+     * Get the inner HTML of an element
+     * 
+     * @param DOMElement $element
+     * @return string
+     */
+    public function getInnerHtml(DOMElement $element): string
+    {
+        $html = '';
+        foreach ($element->childNodes as $child) {
+            $html .= $this->saveHTML($child);
+        }
+        return $html;
+    }
+    
+    /**
+     * Set the inner HTML of an element
+     * 
+     * @param DOMElement $element
+     * @param string $html
+     * @return void
+     */
+    public function setInnerHtml(DOMElement $element, string $html): void
+    {
+        // Remove all existing child nodes
+        while ($element->firstChild) {
+            $element->removeChild($element->firstChild);
+        }
+        
+        // If there's HTML to add, create a fragment and append it
+        if ($html !== '') {
+            $fragment = $this->createFragment($html);
+            $element->appendChild($fragment);
+        }
     }
     
     /**
