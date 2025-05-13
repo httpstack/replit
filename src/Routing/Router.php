@@ -56,7 +56,7 @@ class Router
      * @var array
      */
     protected array $nameList = [];
-    
+    protected string $basePath = '/replit';
     /**
      * Create a new router instance
      * 
@@ -76,7 +76,28 @@ class Router
      */
     public function get(string $uri, $handler): Route
     {
-        return $this->addRoute(['GET'], $uri, $handler);
+        echo "URI coming into Router:get: {$uri}\n";
+        $rt = $this->addRoute(['GET'], $uri, $handler);
+        /*
+        echo "<pre>";
+        echo "GET route added: {$uri}\n";
+        echo "Handler: ";
+        if (is_array($handler)) {
+            echo implode('::', $handler);
+        } elseif (is_string($handler)) {
+            echo $handler;
+        } elseif ($handler instanceof \Closure) {
+            echo 'Closure';
+        } else {
+            echo gettype($handler);
+        }
+        echo "\n";
+        echo "Route details:\n";
+        echo "Methods: " . implode(', ', $rt->getMethods()) . "\n";
+        echo "URI: " . $rt->getUri() . "\n";
+        echo "</pre>";
+        */
+        return $rt;
     }
     
     /**
@@ -198,6 +219,7 @@ class Router
      */
     protected function addRoute(array $methods, string $uri, $handler): Route
     {
+        echo "URI coming into Router:addRoute {$uri}\n";
         // Get the current group stack
         $groupStack = $this->getGroupStack();
         
@@ -282,6 +304,7 @@ class Router
      */
     public function dispatch(Request $request): Response
     {
+        //var_dump($request);
         // Find a matching route
         $route = $this->findRoute($request);
         
@@ -319,16 +342,20 @@ class Router
     protected function findRoute(Request $request): ?Route
     {
         $method = $request->getMethod();
-        $path = $request->getPath();
+        $path = $request->getUri();
         
         foreach ($this->routes as $route) {
+            echo "stored route is :" . $route->getUri(); 
+            echo "path is :" . $path;         
             if (!in_array($method, $route->getMethods())) {
                 continue;
             }
             
             $matches = [];
             $pattern = $this->buildRegexPattern($route->getUri());
-            
+            $pattern = $this->basePath . $pattern;
+            echo "pattern is : " . $pattern;
+            echo "<br>";
             if (preg_match($pattern, $path, $matches)) {
                 // Extract parameters from the URI
                 $params = $this->extractParameters($route->getUri(), $matches);
@@ -349,15 +376,22 @@ class Router
      */
     protected function buildRegexPattern(string $uri): string
     {
-        // Replace named parameters with regex patterns
-        $pattern = preg_replace('/{([a-zA-Z0-9_]+)}/', '(?<$1>[^/]+)', $uri);
+        echo "<br>";
+        echo "// Replace named parameters with regex patterns";
+       $pattern = preg_replace('/{([a-zA-Z0-9_]+)}/', '(?<$1>[^/]+)', $uri);
+       echo $pattern;
         
-        // Replace optional parameters
+        echo "<br>";
+        echo "// Replace optional parameters";
         $pattern = preg_replace('/{([a-zA-Z0-9_]+)\?}/', '(?<$1>[^/]*)?', $pattern);
+        echo $pattern;
         
-        // Escape forward slashes
+        
+        echo "<br>";
+        echo "// Escape forward slashes";
         $pattern = str_replace('/', '\/', $pattern);
-        
+        echo $pattern;
+
         return '/^' . $pattern . '$/';
     }
     

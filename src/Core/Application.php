@@ -343,6 +343,18 @@ class Application
         try {
             // Create the request from globals
             $request = Request::capture();
+            /*
+            echo "<pre>";
+            echo "The URI returned by the captured request Request:getMethod" . $request->getUri() . "\n";
+            echo "Request Method: " . $request->getMethod() . "\n";
+            echo "Request Headers: \n";
+            foreach ($request->getHeaders() as $key => $value) {
+                echo "$key: $value\n";
+            }
+            echo "Request Body: \n";
+            echo $request->getBody() . "\n";
+            echo "</pre>";
+            */
             $this->instance('request', $request);
             
             // Get the router

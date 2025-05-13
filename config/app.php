@@ -51,7 +51,7 @@ return [
     | You should set this to the root of your application.
     |
     */
-    'url' => 'http://localhost',
+    'url' => 'http://localhost/replit/',
     
     /*
     |--------------------------------------------------------------------------

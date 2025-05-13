@@ -84,7 +84,19 @@ class Request
         
         return $request;
     }
-    
+    public function getBody()
+    {
+        return $this->content;
+    }
+
+    public function getHeaders()
+    {
+        return $this->headers;
+    }
+    public function getUri()
+    {
+        return $this->server['REQUEST_URI'];
+    }
     /**
      * Initialize the request
      * 
