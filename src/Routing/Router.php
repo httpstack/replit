@@ -310,6 +310,9 @@ class Router
         
         if ($route === null) {
             throw new FrameworkException("No route found for {$request->getMethod()} {$request->getPath()}", 404);
+        }else{
+            var_dump($route);
+           // echo "Route found: " . $route->getUri() . "\n";
         }
         
         $this->currentRoute = $route;
@@ -342,7 +345,7 @@ class Router
     protected function findRoute(Request $request): ?Route
     {
         $method = $request->getMethod();
-        $path = $request->getUri();
+        $path = $this->basePath . $request->getUri();
         
         foreach ($this->routes as $route) {
             echo "stored route is :" . $route->getUri(); 
@@ -352,8 +355,8 @@ class Router
             }
             
             $matches = [];
-            $pattern = $this->buildRegexPattern($route->getUri());
-            $pattern = $this->basePath . $pattern;
+            $fullUri = $this->basePath . $request->getUri();
+            $pattern = $this->buildRegexPattern($fullUri);
             echo "pattern is : " . $pattern;
             echo "<br>";
             if (preg_match($pattern, $path, $matches)) {
