@@ -10,12 +10,14 @@ use App\Controllers\HomeController;
 use App\Controllers\UserController;
 use App\Controllers\BlogController;
 use App\Middleware\ExampleMiddleware;
-use Framework\Routing\Router;
+use App\Middleware\TemplateMiddleware;
 
-// Get the router instance
-$router = app('router');
+// Get the router instance from the application container
+$router = $app->getContainer()->make('router');
 
-// Define routes with anonymous functions
+// Define routes
+$router->get('/home', [HomeController::class, 'index']);
+$router->get('/about', [HomeController::class, 'about']);
 
 
 

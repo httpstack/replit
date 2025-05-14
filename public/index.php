@@ -5,16 +5,21 @@
  * This file bootstraps the application and starts the request handling process.
  */
 
-// Define the base path constant
-define('BASE_PATH', dirname(__DIR__));
+require_once __DIR__ . '/../vendor/autoload.php';
 
-// Load Composer's autoloader
-require BASE_PATH . '/vendor/autoload.php';
+use Framework\Core\Application;
 
-// Bootstrap the application
-$app = require_once BASE_PATH . '/src/Core/Bootstrap.php';
-$router = $app->get('router');
-$router->get("/", ["App\Controllers\HomeController","index"]);
-//echo $_SERVER['REQUEST_URI'];
-// Run the application
+// Create the application instance
+$app = new Application(__DIR__ . '/../');
+
+// Set environment and debug mode
+$config = $app->getContainer()->make('config');
+$app->setEnvironment($config['app']['env'] ?? 'production');
+$app->setDebug($config['app']['debug'] ?? false);
+
+// Load routes
+require_once $app->routesPath('web.php');
+
+// Boot and run the application
+$app->boot();
 $app->run();

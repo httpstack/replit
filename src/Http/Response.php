@@ -74,7 +74,10 @@ class Response
         $this->content = $content;
         return $this;
     }
-    
+    public function setBody(string $content): self
+    {
+        return $this->setContent($content);
+    }
     /**
      * Get the response content
      * 

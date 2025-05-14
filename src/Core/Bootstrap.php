@@ -10,7 +10,7 @@ use Framework\Template\DomManipulator;
 use Framework\FileSystem\FileLoader;
 use Framework\FileSystem\DirectoryMapper;
 use Framework\Middleware\SessionMiddleware;
-
+use App\Controllers\HomeController;
 /**
  * Bootstrap the application
  * 

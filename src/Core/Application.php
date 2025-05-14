@@ -5,8 +5,13 @@ namespace Framework\Core;
 use Framework\Container\Container;
 use Framework\Http\Request;
 use Framework\Http\Response;
+use Framework\Http\Session;
 use Framework\Routing\Router;
-use Framework\Container\ServiceProvider;
+use Framework\Template\TemplateEngine;
+use Framework\Template\DomManipulator;
+use Framework\FileSystem\FileLoader;
+use Framework\FileSystem\DirectoryMapper;
+use Framework\Middleware\SessionMiddleware;
 use Framework\Exceptions\FrameworkException;
 
 /**
@@ -22,317 +27,167 @@ class Application
      * @var Container
      */
     protected Container $container;
-    
+
     /**
      * The base path of the application
      * 
      * @var string
      */
     protected string $basePath;
-    
+
     /**
      * Application environment
      * 
      * @var string
      */
     protected string $environment = 'production';
-    
+
     /**
      * Whether the application is in debug mode
      * 
      * @var bool
      */
     protected bool $debug = false;
-    
-    /**
-     * Service providers
-     * 
-     * @var array
-     */
-    protected array $serviceProviders = [];
-    
-    /**
-     * Booted service providers
-     * 
-     * @var array
-     */
-    protected array $bootedProviders = [];
-    
+
     /**
      * Create a new application instance
      * 
      * @param string $basePath
      */
-    public function __construct(string $basePath = '')
+    public function __construct(string $basePath)
     {
         $this->basePath = rtrim($basePath, '/');
         $this->container = new Container();
-        
+
         // Register the application in the container
         $this->container->instance('app', $this);
         $this->container->instance(self::class, $this);
         $this->container->instance(Container::class, $this->container);
-        
-        // Make the app globally available
-        $GLOBALS['app'] = $this;
+
+        // Register core services
+        $this->registerCoreServices();
+
+        // Register global middleware
+        $this->registerGlobalMiddleware();
+
+        // Register service providers
+        $this->registerProviders();
     }
-    
+
     /**
-     * Get the application container
+     * Register core services in the container
      * 
-     * @return Container
+     * @return void
      */
-    public function getContainer(): Container
+    protected function registerCoreServices(): void
     {
-        return $this->container;
-    }
-    
-    /**
-     * Get the application base path
-     * 
-     * @param string $path
-     * @return string
-     */
-    public function basePath(string $path = ''): string
-    {
-        return $this->basePath . ($path ? DIRECTORY_SEPARATOR . $path : '');
-    }
-    
-    /**
-     * Get the configuration path
-     * 
-     * @param string $path
-     * @return string
-     */
-    public function configPath(string $path = ''): string
-    {
-        return $this->basePath . DIRECTORY_SEPARATOR . 'config' . ($path ? DIRECTORY_SEPARATOR . $path : '');
-    }
-    
-    /**
-     * Get the routes path
-     * 
-     * @param string $path
-     * @return string
-     */
-    public function routesPath(string $path = ''): string
-    {
-        return $this->basePath . DIRECTORY_SEPARATOR . 'routes' . ($path ? DIRECTORY_SEPARATOR . $path : '');
-    }
-    
-    /**
-     * Get the app path
-     * 
-     * @param string $path
-     * @return string
-     */
-    public function appPath(string $path = ''): string
-    {
-        return $this->basePath . DIRECTORY_SEPARATOR . 'app' . ($path ? DIRECTORY_SEPARATOR . $path : '');
-    }
-    
-    /**
-     * Get the templates path
-     * 
-     * @param string $path
-     * @return string
-     */
-    public function templatesPath(string $path = ''): string
-    {
-        return $this->basePath . DIRECTORY_SEPARATOR . 'templates' . ($path ? DIRECTORY_SEPARATOR . $path : '');
-    }
-    
-    /**
-     * Load a configuration file
-     * 
-     * @param string $name
-     * @return array
-     */
-    public function config(string $name): array
-    {
-        $path = $this->configPath($name . '.php');
-        
-        if (file_exists($path)) {
-            return require $path;
-        }
-        
-        return [];
-    }
-    
-    /**
-     * Set the application environment
-     * 
-     * @param string $environment
-     * @return $this
-     */
-    public function setEnvironment(string $environment): self
-    {
-        $this->environment = $environment;
-        return $this;
-    }
-    
-    /**
-     * Get the application environment
-     * 
-     * @return string
-     */
-    public function getEnvironment(): string
-    {
-        return $this->environment;
-    }
-    
-    /**
-     * Determine if the application is in the given environment
-     * 
-     * @param string $environment
-     * @return bool
-     */
-    public function isEnvironment(string $environment): bool
-    {
-        return $this->environment === $environment;
-    }
-    
-    /**
-     * Enable or disable debug mode
-     * 
-     * @param bool $debug
-     * @return $this
-     */
-    public function setDebug(bool $debug): self
-    {
-        $this->debug = $debug;
-        return $this;
-    }
-    
-    /**
-     * Determine if the application is in debug mode
-     * 
-     * @return bool
-     */
-    public function isDebug(): bool
-    {
-        return $this->debug;
-    }
-    
-    /**
-     * Register a service provider
-     * 
-     * @param string $provider
-     * @return $this
-     */
-    public function register(string $provider): self
-    {
-        if (isset($this->serviceProviders[$provider])) {
-            return $this;
-        }
-        
-        $providerInstance = new $provider($this->container);
-        
-        if (!($providerInstance instanceof ServiceProvider)) {
-            throw new FrameworkException("{$provider} must be an instance of ServiceProvider");
-        }
-        
-        $this->serviceProviders[$provider] = $providerInstance;
-        
-        $providerInstance->register();
-        
-        return $this;
-    }
-    
-    /**
-     * Boot the service providers
-     * 
-     * @return $this
-     */
-    public function boot(): self
-    {
-        foreach ($this->serviceProviders as $provider) {
-            if (!isset($this->bootedProviders[get_class($provider)])) {
-                $provider->boot();
-                $this->bootedProviders[get_class($provider)] = true;
+        // Register the router
+        $this->container->singleton('router', function ($container) {
+            return new Router($container);
+        });
+
+        // Register the request
+        $this->container->singleton('request', function () {
+            return Request::capture();
+        });
+
+        // Register the session
+        $this->container->singleton('session', function () {
+            return new Session();
+        });
+
+        // Register the file loader
+        $this->container->singleton('fileLoader', function () {
+            $fileLoader = new FileLoader();
+            $fileLoader->mapDirectory('app', $this->appPath());
+            $fileLoader->mapDirectory('config', $this->configPath());
+            $fileLoader->mapDirectory('routes', $this->routesPath());
+            $fileLoader->mapDirectory('templates', $this->templatesPath());
+
+            return $fileLoader;
+        });
+
+        // Register the directory mapper
+        $this->container->singleton('directoryMapper', function () {
+            return new DirectoryMapper([
+                'app' => $this->appPath(),
+                'config' => $this->configPath(),
+                'routes' => $this->routesPath(),
+                'templates' => $this->templatesPath(),
+            ]);
+        });
+
+        // Register the template engine
+        $this->container->singleton('template', function ($container) {
+            $fileLoader = $container->make('fileLoader');
+            $dom = new DomManipulator();
+
+            return new TemplateEngine(
+                $fileLoader,
+                $dom,
+                $this->templatesPath()
+            );
+        });
+
+        // Register the config service
+        $this->container->singleton('config', function () {
+            $configPath = $this->configPath();
+            $config = [];
+
+            // Load all PHP files in the config directory
+            foreach (glob($configPath . '/*.php') as $file) {
+                $key = basename($file, '.php');
+                $config[$key] = require $file;
             }
-        }
-        
-        return $this;
+
+            return $config;
+        });
     }
-    
+
     /**
-     * Register all service providers from the config
+     * Register global middleware
      * 
-     * @return $this
+     * @return void
      */
-    public function registerProviders(): self
+    protected function registerGlobalMiddleware(): void
     {
-        $providers = $this->config('app')['providers'] ?? [];
-        
-        foreach ($providers as $provider) {
-            $this->register($provider);
-        }
-        
-        return $this;
+        $router = $this->container->make('router');
+        $router->middleware([
+            SessionMiddleware::class,
+        ]);
     }
-    
+
     /**
-     * Get a service from the container
+     * Register service providers
      * 
-     * @param string $name
-     * @return mixed
+     * @return void
      */
-    public function get(string $name)
+    protected function registerProviders(): void
     {
-        return $this->container->make($name);
+        // Example: Register additional service providers here
+        // $this->container->make(SomeServiceProvider::class)->register();
     }
-    
+
     /**
-     * Check if a service exists in the container
+     * Load routes from the routes directory
      * 
-     * @param string $name
-     * @return bool
+     * @return void
      */
-    public function has(string $name): bool
+    protected function loadRoutes(): void
     {
-        return $this->container->has($name);
+        require_once $this->routesPath('web.php');
     }
-    
+
     /**
-     * Register a binding with the container
+     * Boot the application
      * 
-     * @param string $abstract
-     * @param callable|string|null $concrete
-     * @param bool $shared
-     * @return $this
+     * @return void
      */
-    public function bind(string $abstract, $concrete = null, bool $shared = false): self
+    public function boot(): void
     {
-        $this->container->bind($abstract, $concrete, $shared);
-        return $this;
+        $this->loadRoutes();
     }
-    
-    /**
-     * Register a shared binding with the container
-     * 
-     * @param string $abstract
-     * @param callable|string|null $concrete
-     * @return $this
-     */
-    public function singleton(string $abstract, $concrete = null): self
-    {
-        $this->container->singleton($abstract, $concrete);
-        return $this;
-    }
-    
-    /**
-     * Register an existing instance with the container
-     * 
-     * @param string $abstract
-     * @param mixed $instance
-     * @return mixed
-     */
-    public function instance(string $abstract, $instance)
-    {
-        return $this->container->instance($abstract, $instance);
-    }
-    
+
     /**
      * Run the application
      * 
@@ -341,28 +196,13 @@ class Application
     public function run(): void
     {
         try {
-            // Create the request from globals
-            $request = Request::capture();
-            /*
-            echo "<pre>";
-            echo "The URI returned by the captured request Request:getMethod" . $request->getUri() . "\n";
-            echo "Request Method: " . $request->getMethod() . "\n";
-            echo "Request Headers: \n";
-            foreach ($request->getHeaders() as $key => $value) {
-                echo "$key: $value\n";
-            }
-            echo "Request Body: \n";
-            echo $request->getBody() . "\n";
-            echo "</pre>";
-            */
-            $this->instance('request', $request);
-            
-            // Get the router
-            $router = $this->get('router');
-            
-            // Dispatch the request to the router
+            // Get the request and router from the container
+            $request = $this->container->make('request');
+            $router = $this->container->make('router');
+
+            // Dispatch the request and get the response
             $response = $router->dispatch($request);
-            
+
             // Send the response
             $response->send();
         } catch (FrameworkException $e) {
@@ -371,22 +211,21 @@ class Application
             $this->handleException($e);
         }
     }
-    
+
     /**
      * Handle an exception
      * 
      * @param \Exception $e
      * @return void
      */
-    public function handleException(\Exception $e): void
+    protected function handleException(\Exception $e): void
     {
         $statusCode = $e instanceof FrameworkException ? $e->getCode() : 500;
-        
+
         if (!$statusCode || $statusCode < 400 || $statusCode > 599) {
             $statusCode = 500;
         }
-        
-        // If in debug mode, show the error details
+
         if ($this->debug) {
             $response = new Response(
                 '<h1>Error: ' . $e->getMessage() . '</h1>' .
@@ -396,7 +235,6 @@ class Application
                 ['Content-Type' => 'text/html']
             );
         } else {
-            // In production, show a generic error
             $response = new Response(
                 '<h1>Server Error</h1>' .
                 '<p>Sorry, something went wrong on our servers.</p>',
@@ -404,7 +242,80 @@ class Application
                 ['Content-Type' => 'text/html']
             );
         }
-        
+
         $response->send();
+    }
+
+    /**
+     * Set the application environment
+     * 
+     * @param string $environment
+     * @return void
+     */
+    public function setEnvironment(string $environment): void
+    {
+        $this->environment = $environment;
+    }
+
+    /**
+     * Set debug mode
+     * 
+     * @param bool $debug
+     * @return void
+     */
+    public function setDebug(bool $debug): void
+    {
+        $this->debug = $debug;
+    }
+
+    /**
+     * Get the application container
+     * 
+     * @return Container
+     */
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
+
+    /**
+     * Get the application path
+     * 
+     * @return string
+     */
+    public function appPath(): string
+    {
+        return $this->basePath . '/app';
+    }
+
+    /**
+     * Get the configuration path
+     * 
+     * @return string
+     */
+    public function configPath(): string
+    {
+        return $this->basePath . '/config';
+    }
+
+    /**
+     * Get the routes path
+     * 
+     * @param string $file
+     * @return string
+     */
+    public function routesPath(string $file = ''): string
+    {
+        return $this->basePath . '/routes' . ($file ? '/' . $file : '');
+    }
+
+    /**
+     * Get the templates path
+     * 
+     * @return string
+     */
+    public function templatesPath(): string
+    {
+        return $this->basePath . '/templates';
     }
 }

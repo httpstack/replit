@@ -114,6 +114,6 @@ return [
     */
     'template' => [
         'cache' => false,
-        'directory' => BASE_PATH . '/templates',
+        'directory' => '/templates',
     ],
 ];
