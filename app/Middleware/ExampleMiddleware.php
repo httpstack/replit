@@ -20,12 +20,18 @@ class ExampleMiddleware implements MiddlewareInterface
      * @param callable $next
      * @return Response
      */
+    public function index(Request $request, callable $next): Response
+    {
+        echo "Middleware index method called\n";
+        // Call the process method to handle the request
+        return $this->process($request, $next);
+    }
     public function process(Request $request, callable $next): Response
     {
         // Perform actions before the request is handled
         
         // For example, add a custom header to the request
-        $request->setAttribute('X-Example-Middleware', 'processed');
+       //.$request->setHeader('X-Example-Middleware', 'processed');
         
         // Or check a condition before allowing the request to proceed
         if ($request->getMethod() === 'POST' && !$request->has('_token')) {

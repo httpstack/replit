@@ -18,6 +18,6 @@ $router = $app->getContainer()->make('router');
 // Define routes
 $router->get('/home', [HomeController::class, 'index']);
 $router->get('/about', [HomeController::class, 'about']);
-
+$router->middleware(ExampleMiddleware::class);
 
 
