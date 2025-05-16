@@ -123,11 +123,9 @@ class Application
         // Register the template engine
         $this->container->singleton('template', function ($container) {
             $fileLoader = $container->make('fileLoader');
-            $dom = new DomManipulator();
             
             return new TemplateEngine(
                 $fileLoader,
-                $dom,
                 $this->templatesPath()
             );
         });

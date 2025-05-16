@@ -2,8 +2,10 @@
 
 namespace Framework\Template;
 
+use DOMDocument;
 use Framework\Exceptions\FrameworkException;
 use Framework\FileSystem\FileLoader;
+use Framework\Traits\DomUtility;
 
 /**
  * Template Engine
@@ -11,7 +13,7 @@ use Framework\FileSystem\FileLoader;
  * Handles template loading, rendering, and variable replacement
  * using DOM manipulation and string replacements
  */
-class TemplateEngine
+class TemplateEngine extends DOMDocument
 {
     /**
      * File loader instance
@@ -52,17 +54,21 @@ class TemplateEngine
      * Create a new template engine
      * 
      * @param FileLoader $fileLoader
-     * @param DomManipulator $dom
      * @param string $templateDir
      */
+    use DomUtility;
+
     public function __construct(
         FileLoader $fileLoader,
-        DomManipulator $dom,
         string $templateDir
     ) {
+        parent::__construct("1.0", "UTF-8");
+        $this->formatOutput = true;
+        $this->preserveWhiteSpace = false;
+        $this->registerNodeClass('DOMElement', \DOMElement::class);
         $this->fileLoader = $fileLoader;
-        $this->dom = $dom;
         $this->templateDir = rtrim($templateDir, '/');
+        $this->xpath = new \DOMXPath($this);
     }
     
     /**
@@ -102,7 +108,23 @@ class TemplateEngine
         // Process the template
         return $this->processTemplate($content);
     }
-    
+    public function injectView(string $template, string $id): string
+    {
+        // Combine assigned variables with method variables
+        $hostNode = $this->getElementById($id);
+
+
+        $content = $this->loadTemplate($template);
+        $fragment = $this->createFragment($content);
+        if ($hostNode instanceof \DOMElement) {
+            $hostNode->parentNode->replaceChild($fragment, $hostNode);
+        } else {
+            throw new FrameworkException("Invalid host node type: XPath must point to a DOMElement.");
+        }
+        $this->xpath = new \DOMXPath($this);
+        // Process the template
+        return "1";
+    }
     /**
      * Load a template file
      * 
@@ -110,7 +132,7 @@ class TemplateEngine
      * @return string
      * @throws FrameworkException
      */
-    protected function loadTemplate(string $template): string
+    public function loadTemplate(string $template): string
     {
         $templatePath = $this->resolveTemplatePath($template);
         
@@ -159,7 +181,7 @@ class TemplateEngine
     protected function processTemplate(string $content): string
     {
         // Load the content into the DOM manipulator
-        $this->dom->loadHTML($content);
+        $this->loadHTML($content);
         
         // Process template includes
         $this->processIncludes();
@@ -174,7 +196,7 @@ class TemplateEngine
         $this->processDataModels();
         
         // Get the processed HTML
-        $html = $this->dom->saveHTML();
+        $html = $this->saveHTML();
         
         // Process variable placeholders {{ var }}
         return $this->processVariables($html);
@@ -187,7 +209,7 @@ class TemplateEngine
      */
     protected function processIncludes(): void
     {
-        $includes = $this->dom->findAll('[data-include]');
+        $includes = $this->findAll('[data-include]');
         
         foreach ($includes as $element) {
             if ($element instanceof \DOMElement) {
@@ -200,7 +222,7 @@ class TemplateEngine
                 $includedContent = $this->loadTemplate($templateName);
                 
                 // Create a document fragment
-                $fragment = $this->dom->createFragment($includedContent);
+                $fragment = $this->createFragment($includedContent);
                 
                 // Replace the element with the fragment
                 if ($element->parentNode !== null) {
@@ -208,7 +230,7 @@ class TemplateEngine
                 }
             } catch (FrameworkException $e) {
                 // If template not found, add an error comment
-                $comment = $this->dom->createComment("Include Error: {$e->getMessage()}");
+                $comment = $this->createComment("Include Error: {$e->getMessage()}");
                 $element->parentNode->replaceChild($comment, $element);
             }
         }
@@ -221,7 +243,7 @@ class TemplateEngine
      */
     protected function processDataTemplates(): void
     {
-        $elements = $this->dom->findAll('[data-template]');
+        $elements = $this->findAll('[data-template]');
         
         foreach ($elements as $element) {
             if ($element instanceof \DOMElement) {
@@ -261,7 +283,7 @@ class TemplateEngine
                     }
                     
                     // Append the processed content
-                    $fragment = $this->dom->createFragment($itemContent);
+                    $fragment = $this->createFragment($itemContent);
                     $element->appendChild($fragment);
                 }
             }
@@ -279,7 +301,7 @@ class TemplateEngine
      */
     protected function processDataViews(): void
     {
-        $elements = $this->dom->findAll('[data-view]');
+        $elements = $this->findAll('[data-view]');
         
         foreach ($elements as $element) {
             if ($element instanceof \DOMElement) {
@@ -304,14 +326,14 @@ class TemplateEngine
                 $viewContent = $this->loadTemplate($viewName);
                 
                 // Create a document fragment
-                $fragment = $this->dom->createFragment($viewContent);
+                $fragment = $this->createFragment($viewContent);
                 
                 // Replace the element's content with the fragment
                 $element->textContent = '';
                 $element->appendChild($fragment);
             } catch (FrameworkException $e) {
                 // If view not found, add an error comment
-                $comment = $this->dom->createComment("View Error: {$e->getMessage()}");
+                $comment = $this->createComment("View Error: {$e->getMessage()}");
                 $element->textContent = '';
                 $element->appendChild($comment);
             }
@@ -329,7 +351,7 @@ class TemplateEngine
      */
     protected function processDataModels(): void
     {
-        $elements = $this->dom->findAll('[data-model]');
+        $elements = $this->findAll('[data-model]');
         
         foreach ($elements as $element) {
             if ($element instanceof \DOMElement) {
@@ -345,7 +367,7 @@ class TemplateEngine
                     // For each property in the model
                     foreach ($modelData as $key => $value) {
                         // Find elements with data-bind that match this property
-                        $boundElements = $this->dom->findAll("[data-bind=\"{$modelName}.{$key}\"]");
+                        $boundElements = $this->findAll("[data-bind=\"{$modelName}.{$key}\"]");
                         
                         foreach ($boundElements as $boundElement) {
                             // Determine how to set the value based on the element type

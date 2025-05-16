@@ -12,6 +12,17 @@ use Framework\Http\Response;
  */
 class HomeController
 {
+    protected $app;
+    protected $container;
+    protected $template;
+    public function __construct()
+    {
+        // Constructor logic if needed
+        global $app;
+        $this->app = $app;
+        $this->container = $app->getContainer();
+        $this->template = $this->container->make('template');
+    }
     /**
      * Display the home page
      * 
@@ -20,11 +31,10 @@ class HomeController
      */
     public function index(Request $request): Response
     {
+        $response = new Response();
 
-        $response->setHeader('Content-Type', 'text/html');
-        $final = "<h1>Welcome to the Home Page</h1>";
-        $response->setContent($final);
-        
+        $this->template->injectView("home/index", "viewContent");
+        $response->setBody($this->template->saveHTML());
         return $response;
     }           
 
