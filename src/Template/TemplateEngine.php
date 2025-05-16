@@ -331,7 +331,7 @@ class TemplateEngine
                         
                         foreach ($boundElements as $boundElement) {
                             // Determine how to set the value based on the element type
-                            $tagName = strtolower($boundElement->tagName);
+                            $tagName = $boundElement instanceof \DOMElement ? strtolower($boundElement->tagName) : '';
                             
                             if ($tagName === 'input' || $tagName === 'textarea' || $tagName === 'select') {
                                 $boundElement->setAttribute('value', (string)$value);

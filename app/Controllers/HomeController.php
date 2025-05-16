@@ -20,10 +20,13 @@ class HomeController
      */
     public function index(Request $request): Response
     {
-        $response = new Response();
-        $response->setBody('<h1>Welcome to the Home Page</h1>');
+
+        $response->setHeader('Content-Type', 'text/html');
+        $final = "<h1>Welcome to the Home Page</h1>";
+        $response->setContent($final);
+        
         return $response;
-    }
+    }           
 
     /**
      * Display the about page

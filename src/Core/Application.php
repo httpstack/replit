@@ -85,7 +85,10 @@ class Application
         $this->container->singleton('router', function ($container) {
             return new Router($container);
         });
-
+        // Register the response
+        $this->container->singleton('response', function () {
+            return new Response();
+        });
         // Register the request
         $this->container->singleton('request', function () {
             return Request::capture();

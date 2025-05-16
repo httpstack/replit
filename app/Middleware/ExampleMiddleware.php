@@ -45,7 +45,7 @@ class ExampleMiddleware implements MiddlewareInterface
         
         // For example, add a custom header to the response
         $response->setHeader('X-Powered-By', 'Custom MVC Framework 123');
-        
+        $response->setBody("<!DOCTYPE html><html><head><title>Custom MVC Framework</title></head><body><h1>Hello from Custom MVC Framework</h1></body></html>");
         return $response;
     }
 }

@@ -261,7 +261,7 @@ class Response
         
         return new static($text, $status, $headers);
     }
-    
+
     /**
      * Create an empty response
      * 

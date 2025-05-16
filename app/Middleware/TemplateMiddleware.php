@@ -7,35 +7,26 @@ use Framework\Http\Response;
 
 class TemplateMiddleware
 {
-    public function __invoke(Request $request, callable $next): Response
+    public function index(Request $request, callable $next): Response
     {
-        // Get the response from the next middleware or controller
-        $response = $next($request);
+        // Call the process method to handle the request
+        return $this->process($request, $next);
+    }
 
-        // Inject the template into the response body
-        $body = $response->getBody();
-        $template = $this->loadTemplate($body);
+    public function process(Request $request, callable $next): Response
+    {
+        
+        $template = $GLOBALS['app']->getContainer()->make('template');
+        $txt = $template->render("main.html", [
+            'title' => 'My Custom MVC Framework'
+        ]);
+        // Call the next middleware or handler
+        $response = $next($request);        
 
-        $response->setBody($template);
-
+        $response->setHeader('X-Powered-By', 'Custom MVC Framework 123');
+   
+        $response->setContent($txt);
         return $response;
     }
 
-    protected function loadTemplate(string $content): string
-    {
-        // Example: Wrap the content in a basic HTML template
-        return <<<HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Application</title>
-</head>
-<body>
-    $content
-</body>
-</html>
-HTML;
-    }
 }
