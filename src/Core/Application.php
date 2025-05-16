@@ -3,56 +3,46 @@
 namespace Framework\Core;
 
 use Framework\Container\Container;
+use Framework\Database\DatabaseConnection;
+use Framework\Exceptions\FrameworkException;
+use Framework\FileSystem\DirectoryMapper;
+use Framework\FileSystem\FileLoader;
 use Framework\Http\Request;
 use Framework\Http\Response;
 use Framework\Http\Session;
+use Framework\Middleware\SessionMiddleware;
 use Framework\Routing\Router;
 use Framework\Template\TemplateEngine;
-use Framework\Template\DomManipulator;
-use Framework\FileSystem\FileLoader;
-use Framework\FileSystem\DirectoryMapper;
-use Framework\Middleware\SessionMiddleware;
-use Framework\Exceptions\FrameworkException;
 
 /**
- * Application Class
- * 
+ * Application Class.
+ *
  * The core application class that bootstraps and runs the application
  */
 class Application
 {
     /**
-     * The container instance
-     * 
-     * @var Container
+     * The container instance.
      */
     protected Container $container;
 
     /**
-     * The base path of the application
-     * 
-     * @var string
+     * The base path of the application.
      */
     protected string $basePath;
 
     /**
-     * Application environment
-     * 
-     * @var string
+     * Application environment.
      */
     protected string $environment = 'production';
 
     /**
-     * Whether the application is in debug mode
-     * 
-     * @var bool
+     * Whether the application is in debug mode.
      */
     protected bool $debug = false;
 
     /**
-     * Create a new application instance
-     * 
-     * @param string $basePath
+     * Create a new application instance.
      */
     public function __construct(string $basePath)
     {
@@ -75,12 +65,25 @@ class Application
     }
 
     /**
-     * Register core services in the container
-     * 
-     * @return void
+     * Register core services in the container.
      */
     protected function registerCoreServices(): void
     {
+        // Register Database Connection
+        $this->container->singleton('db', function () {
+            $config = $this->container->make('config')['db'] ?? [];
+            if (empty($config)) {
+                throw new FrameworkException('Database configuration not found.');
+            }
+
+            return new DatabaseConnection($config);
+        });
+        $this->container->bind('getAssets', function () {
+            $query = 'SELECT * FROM assets where enabled = 1';
+            $stmt = $this->container->make('db')->select($query);
+
+            return $stmt;
+        });
         // Register the router
         $this->container->singleton('router', function ($container) {
             return new Router($container);
@@ -106,6 +109,7 @@ class Application
             $fileLoader->mapDirectory('config', $this->configPath());
             $fileLoader->mapDirectory('routes', $this->routesPath());
             $fileLoader->mapDirectory('templates', $this->templatesPath());
+            $fileLoader->mapDirectory('assets', $this->assetsPath());
 
             return $fileLoader;
         });
@@ -117,13 +121,14 @@ class Application
                 'config' => $this->configPath(),
                 'routes' => $this->routesPath(),
                 'templates' => $this->templatesPath(),
+                'assets' => $this->assetsPath(),
             ]);
         });
 
         // Register the template engine
         $this->container->singleton('template', function ($container) {
             $fileLoader = $container->make('fileLoader');
-            
+
             return new TemplateEngine(
                 $fileLoader,
                 $this->templatesPath()
@@ -136,7 +141,7 @@ class Application
             $config = [];
 
             // Load all PHP files in the config directory
-            foreach (glob($configPath . '/*.php') as $file) {
+            foreach (glob($configPath.'/*.php') as $file) {
                 $key = basename($file, '.php');
                 $config[$key] = require $file;
             }
@@ -146,9 +151,7 @@ class Application
     }
 
     /**
-     * Register global middleware
-     * 
-     * @return void
+     * Register global middleware.
      */
     protected function registerGlobalMiddleware(): void
     {
@@ -159,9 +162,7 @@ class Application
     }
 
     /**
-     * Register service providers
-     * 
-     * @return void
+     * Register service providers.
      */
     protected function registerProviders(): void
     {
@@ -170,9 +171,7 @@ class Application
     }
 
     /**
-     * Load routes from the routes directory
-     * 
-     * @return void
+     * Load routes from the routes directory.
      */
     protected function loadRoutes(): void
     {
@@ -180,9 +179,7 @@ class Application
     }
 
     /**
-     * Boot the application
-     * 
-     * @return void
+     * Boot the application.
      */
     public function boot(): void
     {
@@ -190,9 +187,7 @@ class Application
     }
 
     /**
-     * Run the application
-     * 
-     * @return void
+     * Run the application.
      */
     public function run(): void
     {
@@ -214,10 +209,7 @@ class Application
     }
 
     /**
-     * Handle an exception
-     * 
-     * @param \Exception $e
-     * @return void
+     * Handle an exception.
      */
     protected function handleException(\Exception $e): void
     {
@@ -229,15 +221,15 @@ class Application
 
         if ($this->debug) {
             $response = new Response(
-                '<h1>Error: ' . $e->getMessage() . '</h1>' .
-                '<p>File: ' . $e->getFile() . ' (Line: ' . $e->getLine() . ')</p>' .
-                '<pre>' . $e->getTraceAsString() . '</pre>',
+                '<h1>Error: '.$e->getMessage().'</h1>'.
+                '<p>File: '.$e->getFile().' (Line: '.$e->getLine().')</p>'.
+                '<pre>'.$e->getTraceAsString().'</pre>',
                 $statusCode,
                 ['Content-Type' => 'text/html']
             );
         } else {
             $response = new Response(
-                '<h1>Server Error</h1>' .
+                '<h1>Server Error</h1>'.
                 '<p>Sorry, something went wrong on our servers.</p>',
                 $statusCode,
                 ['Content-Type' => 'text/html']
@@ -248,10 +240,7 @@ class Application
     }
 
     /**
-     * Set the application environment
-     * 
-     * @param string $environment
-     * @return void
+     * Set the application environment.
      */
     public function setEnvironment(string $environment): void
     {
@@ -259,10 +248,7 @@ class Application
     }
 
     /**
-     * Set debug mode
-     * 
-     * @param bool $debug
-     * @return void
+     * Set debug mode.
      */
     public function setDebug(bool $debug): void
     {
@@ -270,9 +256,7 @@ class Application
     }
 
     /**
-     * Get the application container
-     * 
-     * @return Container
+     * Get the application container.
      */
     public function getContainer(): Container
     {
@@ -280,43 +264,39 @@ class Application
     }
 
     /**
-     * Get the application path
-     * 
-     * @return string
+     * Get the application path.
      */
     public function appPath(): string
     {
-        return $this->basePath . '/app';
+        return $this->basePath.'/app';
     }
 
     /**
-     * Get the configuration path
-     * 
-     * @return string
+     * Get the configuration path.
      */
     public function configPath(): string
     {
-        return $this->basePath . '/config';
+        return $this->basePath.'/config';
     }
 
     /**
-     * Get the routes path
-     * 
-     * @param string $file
-     * @return string
+     * Get the routes path.
      */
     public function routesPath(string $file = ''): string
     {
-        return $this->basePath . '/routes' . ($file ? '/' . $file : '');
+        return $this->basePath.'/routes'.($file ? '/'.$file : '');
     }
 
     /**
-     * Get the templates path
-     * 
-     * @return string
+     * Get the templates path.
      */
     public function templatesPath(): string
     {
-        return $this->basePath . '/templates';
+        return $this->basePath.'/templates';
+    }
+
+    public function assetsPath(): string
+    {
+        return $this->basePath.'/assets';
     }
 }

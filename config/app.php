@@ -17,7 +17,11 @@ return [
     |
     */
     'name' => 'Custom MVC Framework',
-    
+    'slogan' => 'A simple MVC framework for PHP',
+    'version' => '1.0.0',
+    'author' => 'Chris McIntosh',
+    'author_email' => 'chris@httpstack.tech',
+    'copyright' => '2023 Chris McIntosh',
     /*
     |--------------------------------------------------------------------------
     | Application Environment

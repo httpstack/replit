@@ -1,0 +1,32 @@
+{
+    "links.main" :[
+        {
+            "label": "Home",
+            "url": "/",
+            "icon": "home",
+            "description": "Go to the home page",
+            "active": true
+        },
+        {
+            "label": "Resume",
+            "url": "/resume",
+            "icon": "info",
+            "description": "View or D/L my resume",
+            "active": false
+        },
+        {
+            "label": "Contact",
+            "url": "/contact",
+            "icon": "envelope",
+            "description": "Get in touch with us",
+            "active": false
+        },
+        {
+            "label": "Services",
+            "url": "/services",
+            "icon": "cogs",
+            "description": "View our services",
+            "active": false
+        }
+    ]
+}

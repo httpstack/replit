@@ -19,5 +19,10 @@ $router->middleware(TemplateMiddleware::class);
 $router->get('/home', [HomeController::class, 'index']);
 $router->get('/about', [HomeController::class, 'about']);
 
+$router->any('{any}', function () {
+    return view('errors/404', [
+        'title' => 'Page Not Found',
+    ], 404);
+})->where('any', '.*');
 
 
