@@ -31,7 +31,7 @@ class ExampleMiddleware implements MiddlewareInterface
         // Perform actions before the request is handled
         
         // For example, add a custom header to the request
-       //.$request->setHeader('X-Example-Middleware', 'processed');
+       //$request->setHeader('X-Example-Middleware', 'processed');
         
         // Or check a condition before allowing the request to proceed
         if ($request->getMethod() === 'POST' && !$request->has('_token')) {
@@ -44,7 +44,7 @@ class ExampleMiddleware implements MiddlewareInterface
         // Perform actions after the response is generated
         
         // For example, add a custom header to the response
-        $response->setHeader('X-Powered-By', 'Custom MVC Framework');
+        $response->setHeader('X-Powered-By', 'Custom MVC Framework 123');
         
         return $response;
     }
