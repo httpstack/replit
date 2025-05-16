@@ -124,7 +124,7 @@ class Application
         $this->container->singleton('template', function ($container) {
             $fileLoader = $container->make('fileLoader');
             $dom = new DomManipulator();
-
+            
             return new TemplateEngine(
                 $fileLoader,
                 $dom,

@@ -190,7 +190,11 @@ class TemplateEngine
         $includes = $this->dom->findAll('[data-include]');
         
         foreach ($includes as $element) {
-            $templateName = $element->getAttribute('data-include');
+            if ($element instanceof \DOMElement) {
+                $templateName = $element->getAttribute('data-include');
+            } else {
+                throw new FrameworkException("Invalid element type: 'data-include' attribute cannot be accessed.");
+            }
             
             try {
                 $includedContent = $this->loadTemplate($templateName);
@@ -199,7 +203,9 @@ class TemplateEngine
                 $fragment = $this->dom->createFragment($includedContent);
                 
                 // Replace the element with the fragment
-                $element->parentNode->replaceChild($fragment, $element);
+                if ($element->parentNode !== null) {
+                    $element->parentNode->replaceChild($fragment, $element);
+                }
             } catch (FrameworkException $e) {
                 // If template not found, add an error comment
                 $comment = $this->dom->createComment("Include Error: {$e->getMessage()}");
@@ -218,7 +224,11 @@ class TemplateEngine
         $elements = $this->dom->findAll('[data-template]');
         
         foreach ($elements as $element) {
-            $templateName = $element->getAttribute('data-template');
+            if ($element instanceof \DOMElement) {
+                $templateName = $element->getAttribute('data-template');
+            } else {
+                throw new FrameworkException("Invalid element type: 'data-template' attribute cannot be accessed.");
+            }
             $varName = $element->getAttribute('data-var') ?: null;
             
             if ($varName && isset($this->variables[$varName]) && is_array($this->variables[$varName])) {
@@ -272,8 +282,12 @@ class TemplateEngine
         $elements = $this->dom->findAll('[data-view]');
         
         foreach ($elements as $element) {
-            $viewName = $element->getAttribute('data-view');
-            $condition = $element->getAttribute('data-if') ?: null;
+            if ($element instanceof \DOMElement) {
+                $viewName = $element->getAttribute('data-view');
+            } else {
+                throw new FrameworkException("Invalid element type: 'data-view' attribute cannot be accessed.");
+            }
+            $condition = $element->getAttribute('data-if') ?? null;
             
             // Process conditional display
             if ($condition) {
@@ -318,7 +332,11 @@ class TemplateEngine
         $elements = $this->dom->findAll('[data-model]');
         
         foreach ($elements as $element) {
-            $modelName = $element->getAttribute('data-model');
+            if ($element instanceof \DOMElement) {
+                $modelName = $element->getAttribute('data-model');
+            } else {
+                throw new FrameworkException("Invalid element type: 'data-model' attribute cannot be accessed.");
+            }
             
             if (isset($this->variables[$modelName])) {
                 $modelData = $this->variables[$modelName];
@@ -331,7 +349,11 @@ class TemplateEngine
                         
                         foreach ($boundElements as $boundElement) {
                             // Determine how to set the value based on the element type
-                            $tagName = $boundElement instanceof \DOMElement ? strtolower($boundElement->tagName) : '';
+                            if ($boundElement instanceof \DOMElement) {
+                                $tagName = strtolower($boundElement->tagName);
+                            } else {
+                                throw new FrameworkException("Invalid element type: 'data-bind' attribute cannot be accessed.");
+                            }
                             
                             if ($tagName === 'input' || $tagName === 'textarea' || $tagName === 'select') {
                                 $boundElement->setAttribute('value', (string)$value);
