@@ -40,8 +40,7 @@ class ExampleMiddleware implements MiddlewareInterface
         }
         
         // Call the next middleware or handler
-        $response = $next($request);
-        
+        $response = $next($request);        
         // Perform actions after the response is generated
         
         // For example, add a custom header to the response
