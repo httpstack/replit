@@ -61,6 +61,26 @@ class TemplateEngine extends \DOMDocument
 
     public function loadAssets($assets)
     {
+        $head = $this->xpath->query('head')->item(0);
+        var_dump($head);
+        $body = $this->getElementsByTagName('body')->item(0);
+        foreach ($assets as $asset) {
+            $assetPath = $asset['filePath'];
+            if (pathinfo($assetPath)['extension'] === 'css') {
+                $link = $this->createElement('link');
+                $link->setAttribute('rel', 'stylesheet');
+                $link->setAttribute('href', $assetPath);
+                $link->setAttribute('type', 'text/css');
+                $head->appendChild($link);
+            } elseif (pathinfo($assetPath)['extension'] === 'js') {
+                $script = $this->createElement('script');
+                $script->setAttribute('src', $assetPath);
+                $script->setAttribute('type', 'text/javascript');
+                $body->appendChild($script);
+            } else {
+                throw new FrameworkException("Asset not found: {$assetPath}");
+            }
+        }
     }
 
     /**

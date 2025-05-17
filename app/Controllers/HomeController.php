@@ -22,7 +22,7 @@ class HomeController
         global $app;
         $this->app = $app;
         $this->container = $app->getContainer();
-        $this->template = $this->container->make('template');
+        // $this->template = $this->container->make('template');
     }
 
     /**
@@ -31,13 +31,14 @@ class HomeController
     public function index(Request $request): Response
     {
         $response = new Response();
-        var_dump($this->template->fileLoader->findFile('style.css', null, 'css')); // ;
+        // var_dump($this->template->fileLoader->findFile('style.css', null, 'css')); // ;
 
         echo '<pre>';
         // print_r($jsFiles);
         echo '</pre>';
-        $this->template->injectView('home/index', 'viewContent');
-        $response->setBody($this->template->saveHTML());
+        // $this->template->injectView('home/index', 'viewContent');
+        // $response->setBody($this->template->saveHTML());
+        $response->setBody('<h1>Home Page</h1><p>Welcome to the home page.</p>');
 
         return $response;
     }

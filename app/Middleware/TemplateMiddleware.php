@@ -11,16 +11,19 @@ class TemplateMiddleware
     protected $container;
     protected $template;
     protected $config;
+    protected $templateModel;
 
     public function __construct()
     {
         // Constructor logic if needed
         global $app;
         $this->app = $app;
+        $this->app->registerTemplateServices();
         $this->container = $app->getContainer();
         $this->template = $this->container->make('template');
         $this->config = $this->container->make('config')['template'];
         $this->template->assign($this->config);
+        $this->templateModel = $this->container->make('templateModel');
     }
 
     public function index(Request $request, callable $next): Response
@@ -32,13 +35,16 @@ class TemplateMiddleware
     public function process(Request $request, callable $next): Response
     {
         $response = new Response();
+        $baseTemplate = $this->templateModel->getAttribute('baseTemplate');
+        $assets = $this->templateModel->getAttribute('assets');
         // Prepare the assets and the exp replacement vars
-        $doc = $this->template->loadTemplate('layouts/base');
+        $doc = $this->template->loadTemplate($baseTemplate);
         $this->template->loadHTML($doc);
-        $assets = $this->container->make('getAssets');
-        var_dump($assets);
-        $this->template->processData('template');
 
+        // var_dump($assets);
+        $this->template->loadAssets($assets);
+        $this->template->processData('template');
+        var_dump($this->templateModel);
         // Call the next middleware or handler
         $response = $next($request);
 

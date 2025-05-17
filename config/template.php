@@ -1,13 +1,10 @@
 <?php
 
 return [
-    'logo' => 'bi bi-home',
-    'name' => 'httpstack.tech',
-    'slogan' => 'How do you stack?',
-    'assets' => [
-        'bootstrap.min.css',
-        'app.css',
-        'bootstrap.bundle.min.js',
-        'app.js',
-    ],
+    'baseTemplate' => 'layouts/base',
+    'logo' => 'fa fa-home',
+    'siteName' => 'httpstack.tech',
+    'slogan' => 'How do you stACK?',
+    'copyright' => '© 2023 httpstack.tech. All rights reserved.',
+    'footerText' => 'Powered by httpstack.tech',
 ];

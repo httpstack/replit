@@ -2,6 +2,7 @@
 
 namespace Framework\Core;
 
+use App\Models\TemplateModel;
 use Framework\Container\Container;
 use Framework\Database\DatabaseConnection;
 use Framework\Exceptions\FrameworkException;
@@ -78,20 +79,12 @@ class Application
 
             return new DatabaseConnection($config);
         });
-        $this->container->bind('getAssets', function () {
-            $query = 'SELECT * FROM assets where enabled = 1';
-            $stmt = $this->container->make('db')->select($query);
 
-            return $stmt;
-        });
         // Register the router
         $this->container->singleton('router', function ($container) {
             return new Router($container);
         });
-        // Register the response
-        $this->container->singleton('response', function () {
-            return new Response();
-        });
+
         // Register the request
         $this->container->singleton('request', function () {
             return Request::capture();
@@ -125,16 +118,6 @@ class Application
             ]);
         });
 
-        // Register the template engine
-        $this->container->singleton('template', function ($container) {
-            $fileLoader = $container->make('fileLoader');
-
-            return new TemplateEngine(
-                $fileLoader,
-                $this->templatesPath()
-            );
-        });
-
         // Register the config service
         $this->container->singleton('config', function () {
             $configPath = $this->configPath();
@@ -159,6 +142,22 @@ class Application
         $router->middleware([
             SessionMiddleware::class,
         ]);
+    }
+
+    public function registerTemplateServices(): void
+    {
+        // Register the template engine
+        $this->container->singleton('template', function ($container) {
+            $fileLoader = $container->make('fileLoader');
+
+            return new TemplateEngine(
+                $fileLoader,
+                $this->templatesPath()
+            );
+        });
+        $this->container->singleton('templateModel', function () {
+            return new TemplateModel();
+        });
     }
 
     /**

@@ -72,15 +72,13 @@ class FileLoader
      */
     public function findFile(string $name, ?string $directory = null, ?string $extension = null): ?string
     {
-        /*
         $extension = $extension ?? $this->defaultExtension;
 
         // Add extension if not already present
         if (!empty($extension) && !preg_match('/\.'.preg_quote($extension, '/').'$/i', $name)) {
             $name .= '.'.$extension;
         }
-        echo $name;
-        */
+
         // Look in a specific directory if provided
         if ($directory !== null) {
             $dir = $this->mappedDirectories[$directory] ?? $directory;
