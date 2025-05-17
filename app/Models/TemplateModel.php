@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Framework\Database\DatabaseConnection;
-use Framework\FileSystem\FileLoader;
 use Framework\Model\BaseModel;
 
 /**
@@ -16,23 +15,28 @@ class TemplateModel extends BaseModel
     /**
      * Load metadata from the configuration file.
      */
-    public function __construct(protected string $config = 'template')
+    public function __construct(protected string $config = 'template.php')
     {
+        // echo 'Executing TemplateModel constructor<br>'.PHP_EOL;
         global $app;
-        $this->container = $app->getContainer();
+        $container = $app->getContainer();
         parent::__construct();
+
         $this->loadMetadata();
-        $this->loadAssets($this->container->make('db'));
-        $this->loadLinks($this->container->make('db'));
+        $this->loadAssets($container->make('db'));
+        $this->loadLinks($container->make('db'));
     }
 
     public function loadMetadata(): void
     {
-        $fileLoader = new FileLoader();
-        $fileLoader->mapDirectory('config', dirname('/config'));
-        $configData = (array) $fileLoader->loadFile($this->config);
-        var_dump(value: $configData);
-        $this->fill(attributes: $configData);
+        // echo 'Loading metadata from config<br>'.PHP_EOL;
+        global $app;
+        $container = $app->getContainer();
+        $fileLoader = $container->make('fileLoader');
+
+        $configData = $fileLoader->includeFile($this->config);
+        // var_dump(value: $configData);
+        $this->fill($configData);
     }
 
     /**

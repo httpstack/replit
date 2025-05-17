@@ -45,12 +45,14 @@ class TemplateEngine extends \DOMDocument
      * Template cache.
      */
     protected array $cache = [];
+    protected string $basePath;
 
     public function __construct(
         FileLoader $fileLoader,
-        string $templateDir
+        string $templateDir,
     ) {
         parent::__construct('1.0', 'UTF-8');
+        $this->basePath = '/../replit';
         $this->formatOutput = true;
         $this->preserveWhiteSpace = false;
         $this->registerNodeClass('DOMElement', \DOMElement::class);
@@ -61,11 +63,12 @@ class TemplateEngine extends \DOMDocument
 
     public function loadAssets($assets)
     {
-        $head = $this->xpath->query('head')->item(0);
-        var_dump($head);
+        $this->xpath = new \DOMXPath($this);
+        $head = $this->getElementsByTagName('head')->item(0);
+        //  var_dump($head);
         $body = $this->getElementsByTagName('body')->item(0);
         foreach ($assets as $asset) {
-            $assetPath = $asset['filePath'];
+            $assetPath = $this->basePath.$asset['filePath'];
             if (pathinfo($assetPath)['extension'] === 'css') {
                 $link = $this->createElement('link');
                 $link->setAttribute('rel', 'stylesheet');
@@ -143,6 +146,7 @@ class TemplateEngine extends \DOMDocument
      */
     public function loadTemplate(string $template): string
     {
+        // ho 'Loading template: '.$template.PHP_EOL;
         $templatePath = $this->resolveTemplatePath($template);
 
         if (isset($this->cache[$templatePath])) {
@@ -546,5 +550,10 @@ class TemplateEngine extends \DOMDocument
         $this->cache = [];
 
         return $this;
+    }
+
+    public function getXpath(): \DOMXPath
+    {
+        return $this->xpath;
     }
 }

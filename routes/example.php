@@ -1,4 +1,15 @@
-<?php 
+<?php
+
+$router->get('/about', [HomeController::class, 'about']);
+$router->get('/users/{id}', [UserController::class, 'show']);
+$router->get('/users', [UserController::class, 'index']);
+// Simple route with a closure
+$router->any('{any}', function () {
+    return view('errors/404', [
+        'title' => 'Page Not Found',
+    ], 404);
+})->where('any', '.*');
+
 // Define routes with controller methods
 $router->get('/about', [HomeController::class, 'about'])->name('about');
 
@@ -19,7 +30,7 @@ $router->group(['prefix' => 'admin', 'middleware' => [ExampleMiddleware::class]]
             'title' => 'Admin Dashboard',
         ]);
     })->name('admin.dashboard');
-    
+
     $router->get('/users', function () {
         return view('admin/users', [
             'title' => 'Manage Users',
@@ -42,7 +53,7 @@ $router->get('/post/{slug?}', function ($slug = null) {
             'title' => 'All Posts',
         ]);
     }
-    
+
     return view('post/show', [
         'title' => 'Post Details',
         'slug' => $slug,
@@ -57,13 +68,13 @@ $router->get('/contact', [HomeController::class, 'contact'])->name('contact');
 $router->group(['prefix' => 'blog'], function (Router $router) {
     // Blog home page
     $router->get('/', [BlogController::class, 'index'])->name('blog.index');
-    
+
     // Search blog posts
     $router->get('/search', [BlogController::class, 'search'])->name('blog.search');
-    
+
     // View posts by category
     $router->get('/category/{category}', [BlogController::class, 'category'])->name('blog.category');
-    
+
     // View individual blog post (must be last to avoid conflicts)
     $router->get('/{slug}', [BlogController::class, 'show'])
         ->where('slug', '[a-z0-9\-]+')
@@ -74,25 +85,25 @@ $router->group(['prefix' => 'blog'], function (Router $router) {
 $router->group(['prefix' => 'users'], function (Router $router) {
     // List all users from database (MySQL example)
     $router->get('/', [UserController::class, 'index'])->name('users.index');
-    
+
     // Show the create user form
-    $router->get('/create', function() {
+    $router->get('/create', function () {
         return view('users/create', [
             'title' => 'Create User',
             'errors' => [],
-            'data' => []
+            'data' => [],
         ]);
     })->name('users.create');
-    
+
     // Process the new user form submission
     $router->post('/', [UserController::class, 'store'])->name('users.store');
-    
+
     // Get users from JSON data source
     $router->get('/json', [UserController::class, 'jsonUsers'])->name('users.json');
-    
+
     // Search users from JSON data source
     $router->get('/search', [UserController::class, 'searchJson'])->name('users.search');
-    
+
     // Show a single user
     $router->get('/{id}', [UserController::class, 'show'])
         ->where('id', '[0-9]+')  // using the where() method for constraints
@@ -105,4 +116,3 @@ $router->any('{any}', function () {
         'title' => 'Page Not Found',
     ], 404);
 })->where('any', '.*');
-?>

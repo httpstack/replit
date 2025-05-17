@@ -3,72 +3,54 @@
 namespace Framework\Http;
 
 /**
- * HTTP Request Class
- * 
+ * HTTP Request Class.
+ *
  * Represents an HTTP request with convenient access to request data
  */
 class Request
 {
     /**
-     * All request parameters
-     * 
-     * @var array
+     * All request parameters.
      */
     protected array $parameters = [];
-    
+
     /**
-     * Request body content
-     * 
-     * @var string|null
+     * Request body content.
      */
     protected ?string $content = null;
-    
+
     /**
-     * Server parameters
-     * 
-     * @var array
+     * Server parameters.
      */
     protected array $server = [];
-    
+
     /**
-     * Request headers
-     * 
-     * @var array
+     * Request headers.
      */
     protected array $headers = [];
-    
+
     /**
-     * Request cookies
-     * 
-     * @var array
+     * Request cookies.
      */
     protected array $cookies = [];
-    
+
     /**
-     * Request files
-     * 
-     * @var array
+     * Request files.
      */
     protected array $files = [];
-    
+
     /**
-     * Request path
-     * 
-     * @var string
+     * Request path.
      */
     protected string $path;
-    
+
     /**
-     * Request method
-     * 
-     * @var string
+     * Request method.
      */
     protected string $method;
-    
+
     /**
-     * Create a new request instance from globals
-     * 
-     * @return static
+     * Create a new request instance from globals.
      */
     public static function capture(): static
     {
@@ -81,9 +63,10 @@ class Request
             $_FILES,
             $_SERVER
         );
-        
+
         return $request;
     }
+
     public function getBody()
     {
         return $this->content;
@@ -93,20 +76,14 @@ class Request
     {
         return $this->headers;
     }
+
     public function getUri()
     {
         return $this->server['REQUEST_URI'];
     }
+
     /**
-     * Initialize the request
-     * 
-     * @param array $query
-     * @param array $request
-     * @param array $attributes
-     * @param array $cookies
-     * @param array $files
-     * @param array $server
-     * @return void
+     * Initialize the request.
      */
     public function initialize(
         array $query = [],
@@ -120,24 +97,22 @@ class Request
         $this->cookies = $cookies;
         $this->files = $files;
         $this->parameters = array_merge($query, $request, $attributes);
-        
+
         // Parse headers from server variables
         $this->headers = $this->parseHeaders();
-        
+
         // Parse the request URI
         $this->path = $this->parsePath();
-        
+
         // Get the request method
         $this->method = $this->server['REQUEST_METHOD'] ?? 'GET';
-        
+
         // Handle json content
         $this->parseJsonContent();
     }
-    
+
     /**
-     * Parse the request headers from server variables
-     * 
-     * @return array
+     * Parse the request headers from server variables.
      */
     protected function parseHeaders(): array
     {
@@ -151,31 +126,28 @@ class Request
                 $headers[$name] = $value;
             }
         }
-        
+
         return $headers;
     }
-    
+
     /**
-     * Parse the request path from REQUEST_URI
-     * 
-     * @return string
+     * Parse the request path from REQUEST_URI.
      */
     protected function parsePath(): string
     {
         $requestUri = $this->server['REQUEST_URI'] ?? '/';
         $path = parse_url($requestUri, PHP_URL_PATH);
+
         return $path ?: '/';
     }
-    
+
     /**
-     * Parse JSON content if the content type is application/json
-     * 
-     * @return void
+     * Parse JSON content if the content type is application/json.
      */
     protected function parseJsonContent(): void
     {
         $contentType = $this->headers['content-type'] ?? '';
-        
+
         if (strpos($contentType, 'application/json') !== false) {
             $content = file_get_contents('php://input');
             if ($content) {
@@ -187,206 +159,155 @@ class Request
             }
         }
     }
-    
+
     /**
-     * Get the request method
-     * 
-     * @return string
+     * Get the request method.
      */
     public function getMethod(): string
     {
         return $this->method;
     }
-    
+
     /**
-     * Check if the request method matches the given method
-     * 
-     * @param string $method
-     * @return bool
+     * Check if the request method matches the given method.
      */
     public function isMethod(string $method): bool
     {
         return strtoupper($this->method) === strtoupper($method);
     }
-    
+
     /**
-     * Check if the request is an AJAX request
-     * 
-     * @return bool
+     * Check if the request is an AJAX request.
      */
     public function isAjax(): bool
     {
         return $this->headers['x-requested-with'] === 'XMLHttpRequest';
     }
-    
+
     /**
-     * Get the request path
-     * 
-     * @return string
+     * Get the request path.
      */
     public function getPath(): string
     {
         return $this->path;
     }
-    
+
     /**
-     * Get a request parameter
-     * 
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * Get a request parameter.
      */
     public function get(string $key, $default = null): mixed
     {
         return $this->parameters[$key] ?? $default;
     }
-    
+
     /**
-     * Get a query parameter (GET)
-     * 
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * Get a query parameter (GET).
      */
     public function getQuery(string $key, $default = null): mixed
     {
         return $_GET[$key] ?? $default;
     }
-    
+
     /**
-     * Get a post parameter (POST)
-     * 
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * Get a post parameter (POST).
      */
-    public function getPost(string $key = null, $default = null): mixed
+    public function getPost(?string $key = null, $default = null): mixed
     {
         if ($key === null) {
             return $_POST;
         }
+
         return $_POST[$key] ?? $default;
     }
-    
+
     /**
-     * Check if a parameter exists
-     * 
-     * @param string $key
-     * @return bool
+     * Check if a parameter exists.
      */
     public function has(string $key): bool
     {
         return isset($this->parameters[$key]);
     }
-    
+
     /**
-     * Get all request parameters
-     * 
-     * @return array
+     * Get all request parameters.
      */
     public function all(): array
     {
         return $this->parameters;
     }
-    
+
     /**
-     * Get only specified parameters
-     * 
-     * @param array $keys
-     * @return array
+     * Get only specified parameters.
      */
     public function only(array $keys): array
     {
         return array_intersect_key($this->parameters, array_flip($keys));
     }
-    
+
     /**
-     * Get all parameters except the specified ones
-     * 
-     * @param array $keys
-     * @return array
+     * Get all parameters except the specified ones.
      */
     public function except(array $keys): array
     {
         return array_diff_key($this->parameters, array_flip($keys));
     }
-    
+
     /**
-     * Get the raw request content
-     * 
-     * @return string|null
+     * Get the raw request content.
      */
     public function getContent(): ?string
     {
         if ($this->content === null) {
             $this->content = file_get_contents('php://input');
         }
-        
+
         return $this->content;
     }
-    
+
     /**
-     * Get a request header
-     * 
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * Get a request header.
      */
     public function header(string $key, $default = null): mixed
     {
         $key = strtolower($key);
+
         return $this->headers[$key] ?? $default;
     }
-    
+
     /**
-     * Get all request headers
-     * 
-     * @return array
+     * Get all request headers.
      */
     public function headers(): array
     {
         return $this->headers;
     }
-    
+
     /**
-     * Get a cookie
-     * 
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * Get a cookie.
      */
     public function cookie(string $key, $default = null): mixed
     {
         return $this->cookies[$key] ?? $default;
     }
-    
+
     /**
-     * Get a server parameter
-     * 
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * Get a server parameter.
      */
     public function server(string $key, $default = null): mixed
     {
         return $this->server[$key] ?? $default;
     }
-    
+
     /**
-     * Get a file from the request
-     * 
-     * @param string $key
-     * @return mixed
+     * Get a file from the request.
      */
     public function file(string $key): mixed
     {
         return $this->files[$key] ?? null;
     }
-    
+
     /**
-     * Get the client IP address
-     * 
-     * @return string
+     * Get the client IP address.
      */
     public function getIp(): string
     {
@@ -397,69 +318,61 @@ class Request
             'HTTP_X_CLUSTER_CLIENT_IP',
             'HTTP_FORWARDED_FOR',
             'HTTP_FORWARDED',
-            'REMOTE_ADDR'
+            'REMOTE_ADDR',
         ];
-        
+
         foreach ($headers as $header) {
             if (isset($this->server[$header])) {
                 $ips = explode(',', $this->server[$header]);
                 $ip = trim($ips[0]);
-                
+
                 if (filter_var($ip, FILTER_VALIDATE_IP)) {
                     return $ip;
                 }
             }
         }
-        
+
         return '0.0.0.0';
     }
-    
+
     /**
-     * Get the URI query string
-     * 
-     * @return string
+     * Get the URI query string.
      */
     public function getQueryString(): string
     {
         return $this->server['QUERY_STRING'] ?? '';
     }
-    
+
     /**
-     * Get the request scheme (http/https)
-     * 
-     * @return string
+     * Get the request scheme (http/https).
      */
     public function getScheme(): string
     {
-        return isset($this->server['HTTPS']) && 
-               $this->server['HTTPS'] !== 'off' ? 'https' : 'http';
+        return isset($this->server['HTTPS'])
+               && $this->server['HTTPS'] !== 'off' ? 'https' : 'http';
     }
-    
+
     /**
-     * Get the request host
-     * 
-     * @return string
+     * Get the request host.
      */
     public function getHost(): string
     {
         if (isset($this->server['HTTP_HOST'])) {
             return $this->server['HTTP_HOST'];
         }
-        
+
         return $this->server['SERVER_NAME'] ?? 'localhost';
     }
-    
+
     /**
-     * Get the full URL
-     * 
-     * @return string
+     * Get the full URL.
      */
     public function getUrl(): string
     {
         $scheme = $this->getScheme();
         $host = $this->getHost();
         $uri = $this->server['REQUEST_URI'] ?? '/';
-        
+
         return "$scheme://$host$uri";
     }
 }

@@ -156,11 +156,10 @@ class Application
                 $this->templatesPath()
             );
         });
-        /*
+
         $this->container->singleton('templateModel', function () {
             return new TemplateModel();
         });
-        */
     }
 
     /**

@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-template="name"></title>
+
 
 </head>
+
 <body>
-    <header>
-        <div data-template="logo"></div>
-        <div class="container">
-            <h1 data-template="name"></h1>
-            <nav data-template="links.main">
-            </nav>
-        </div>
-    </header>
-    
+
+    <div data-template="logo"></div>
+    <div class="container">
+        <h1 data-template="name"></h1>
+        <nav data-template="links.main">
+        </nav>
+    </div>
+
+
     <main class="container">
         <!-- Flash messages -->
         <div data-template data-var="flash">
             <div class="alert alert-{{ item.type }}">{{ item.message }}</div>
         </div>
-        
+
         <!-- Main content -->
         <div>
             <span id="viewContent"></span><!-- Content will be inserted here -->
         </div>
     </main>
-    
+
     <footer>
         <div class="container">
             <p>&copy; {{ year }} {{ appName }}. All rights reserved.</p>
@@ -35,4 +35,5 @@
         </div>
     </footer>
 </body>
+
 </html>

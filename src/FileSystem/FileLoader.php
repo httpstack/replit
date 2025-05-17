@@ -192,7 +192,7 @@ class FileLoader
         }
 
         // Load the file
-        $content = file_get_contents($path);
+        $content = include $path;
 
         if ($content === false) {
             throw new FrameworkException("Failed to read file: {$path}");
