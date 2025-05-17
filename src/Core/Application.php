@@ -63,6 +63,7 @@ class Application
 
         // Register service providers
         $this->registerProviders();
+        $this->registerTemplateServices();
     }
 
     /**
@@ -155,9 +156,11 @@ class Application
                 $this->templatesPath()
             );
         });
+        /*
         $this->container->singleton('templateModel', function () {
             return new TemplateModel();
         });
+        */
     }
 
     /**
