@@ -39,23 +39,32 @@ class TemplateMiddleware
     public function process(Request $request, callable $next): Response
     {
         $response = new Response();
-        // comment function entrance
-        // cho 'TemplateMiddleware: process() called'.PHP_EOL;
-
+        /*
+        *     LIST OF ALL VARS IN TEMPLATE 
+        *     'baseTemplate' => 'layouts/base',
+        *     'appLogo' => 'bx bx-logo',
+        *     'appName' => 'My Application',
+        *     'appSlogan' => 'Your application slogan here',
+        *     'appVersion' => '1.0.0',
+        *     'appDescription' => 'A simple PHP application',
+        *     'appAuthor' => 'Your Name',
+        *     'appCopyright' => '© 2023 Your Company All rights reserved.',
+         */
+        //Get the file path to the $baseTemplate, the array of $assets and the mlti-dim array of $links
         $baseTemplate = $this->templateModel->getAttribute('baseTemplate');
         $assets = $this->templateModel->getAttribute('assets');
         $links = $this->templateModel->getAttribute('links');
 
+        //PUSH THE TEMPLATES Data Model to the template engine
+        $this->template->assign($this->templateModel->getAttributes());
         // Prepare the assets and the exp replacement vars
         // echo method_exists($this->templateModel, 'getAttribute');
-        $doc = $this->template->loadTemplate($baseTemplate);
+        $doc = $this->template->loadTemplate($baseTemplate, true);
 
-        $this->template->loadHTML($doc);
-        // var_dump($this->template->getXpath()->query('//head')->item(0));
-        // var_dump($assets);
+        //APPEND THE THE GENERATED LINK / SCRIPT TAGS TO THE HEAD OR BODY
+        //WITH DATASOURCE $assets
         $this->template->loadAssets($assets);
-        // $this->template->processData('template');
-        // var_dump($this->templateModel);
+
         // Call the next middleware or handler
         $response = $next($request);
 

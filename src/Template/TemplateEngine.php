@@ -5,6 +5,7 @@ namespace Framework\Template;
 use Framework\Exceptions\FrameworkException;
 use Framework\FileSystem\FileLoader;
 use Framework\Traits\DomUtility;
+use Framework\Model\BaseModel;
 
 /**
  * Template Engine.
@@ -29,7 +30,7 @@ class TemplateEngine extends \DOMDocument
     /**
      * DOM manipulator.
      */
-    protected DomManipulator $dom;
+
 
     /**
      * Template variables.
@@ -85,7 +86,10 @@ class TemplateEngine extends \DOMDocument
             }
         }
     }
-
+    public function setDataModel(BaseModel $model): void
+    {
+        $this->variables = array_merge($this->variables, $model->getAttributes());
+    }
     /**
      * Assign variables to the template.
      *
@@ -144,7 +148,7 @@ class TemplateEngine extends \DOMDocument
      *
      * @throws FrameworkException
      */
-    public function loadTemplate(string $template): string
+    public function loadTemplate(string $template, bool $isBaseTemplate = false): string
     {
         // ho 'Loading template: '.$template.PHP_EOL;
         $templatePath = $this->resolveTemplatePath($template);
@@ -159,7 +163,11 @@ class TemplateEngine extends \DOMDocument
 
         $content = file_get_contents($templatePath);
         $this->cache[$templatePath] = $content;
-
+        //IF THIS IS THE BASE TEMPLATE THEN SET ITS HTML TO THE PARENT DOMDocument
+        if($isBaseTemplate){
+            $this->loadHTML($content);
+        }
+        
         return $content;
     }
 

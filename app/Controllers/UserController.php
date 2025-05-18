@@ -46,14 +46,11 @@ class UserController extends BaseController
     {
         try {
             // Example of fetching users from database
-            $users = $this->db->select('SELECT * FROM users ORDER BY created_at DESC LIMIT 10');
-
+            $users = $this->db->select('SELECT * FROM users');
             // Example of using template engine with data
-            return $this->view('users/index', [
-                'users' => $users,
-                'title' => 'User List',
-                'count' => count($users),
-            ]);
+            var_dump($users);
+
+            return new Response();
         } catch (\Exception $e) {
             // Graceful error handling
             return $this->view('errors/database', [

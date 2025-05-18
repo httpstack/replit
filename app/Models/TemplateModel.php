@@ -12,31 +12,34 @@ use Framework\Model\BaseModel;
  */
 class TemplateModel extends BaseModel
 {
+ 
     /**
      * Load metadata from the configuration file.
      */
-    public function __construct(protected string $config = 'template.php')
+    public function __construct(protected string|array $config = [])
     {
         // echo 'Executing TemplateModel constructor<br>'.PHP_EOL;
         global $app;
         $container = $app->getContainer();
         parent::__construct();
 
-        $this->loadMetadata();
+        $this->loadMetadata($config);
         $this->loadAssets($container->make('db'));
         $this->loadLinks($container->make('db'));
     }
 
-    public function loadMetadata(): void
-    {
-        // echo 'Loading metadata from config<br>'.PHP_EOL;
+    public function loadMetadata(string|array $config): void
+    {   
         global $app;
-        $container = $app->getContainer();
-        $fileLoader = $container->make('fileLoader');
-
-        $configData = $fileLoader->includeFile($this->config);
+        // echo 'Loading metadata from config<br>'.PHP_EOL;
+        if (is_string($config)) {
+            $container = $app->getContainer();
+            $fileLoader = $container->make('fileLoader');
+            $config = $fileLoader->includeFile($config);
+        } 
+        // echo 'Loading metadata from config<br>'.PHP_EOL;
         // var_dump(value: $configData);
-        $this->fill($configData);
+        $this->fill($config);
     }
 
     /**

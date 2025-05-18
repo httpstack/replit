@@ -1,9 +1,16 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    
-    # Redirect all requests to public/index.php
-    RewriteRule ^$ public/index.php [L]
-    
+
+    # Allow access to asset files (CSS, JS, images, fonts, etc.) including subdirectories
+    RewriteCond %{REQUEST_URI} ^/../replit/assets/.* [OR]
+ 
+    RewriteCond %{REQUEST_URI} ^/public/ [OR]
+    RewriteCond %{REQUEST_URI} ^/templates/
+    RewriteRule ^ - [L]
+
+    # Redirect all other requests to public/index.php
+    #RewriteRule ^$ public/index.php [L]
+
     # Redirect requests for non-existing files or directories
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d

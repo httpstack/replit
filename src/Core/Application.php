@@ -158,7 +158,10 @@ class Application
         });
 
         $this->container->singleton('templateModel', function () {
-            return new TemplateModel();
+            //GET TEMPLATE DATA KEY VALUES FROM CONFIG
+            $config = $this->container->make('config')['template'] ?? [];
+            //INITIALIZE THE TEMPLATE MODEL WITH THESE VALUES
+            return new TemplateModel($config);
         });
     }
 

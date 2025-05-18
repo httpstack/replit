@@ -32,7 +32,8 @@ class HomeController
     {
         $response = new Response();
         // var_dump($this->template->fileLoader->findFile('style.css', null, 'css')); // ;
-        // $this->template->injectView('home/index', 'viewContent');
+        $this->template->injectView('home/index', 'viewContent');
+        $this->template->processData('template');
         $response->setBody($this->template->saveHTML());
         // $response->setBody('<h1>Home Page</h1><p>Welcome to the home page.</p>');
 

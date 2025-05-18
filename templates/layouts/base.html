@@ -7,14 +7,20 @@
 </head>
 
 <body>
-
-    <div data-template="logo"></div>
-    <div class="container">
-        <h1 data-template="name"></h1>
-        <nav data-template="links.main">
-        </nav>
-    </div>
-
+    <header>
+        <div data-template="logo"></div>
+        <div class="container">
+            <h1 data-template="appName"></h1>
+            <h6 data-template="appSlogan"></h6>
+            <nav data-template="links.main">
+                <ul>
+                    <li data-template="links.main.item">
+                        <a href="{{ item.href }}">{{ item.text }}</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
     <main class="container">
         <!-- Flash messages -->
@@ -23,15 +29,15 @@
         </div>
 
         <!-- Main content -->
-        <div>
-            <span id="viewContent"></span><!-- Content will be inserted here -->
+        <div id="viewContent">
+            <!-- Content will be inserted here -->
         </div>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; {{ year }} {{ appName }}. All rights reserved.</p>
-            <p>Version: {{ appVersion }}</p>
+            <p data-template="appCopyright"></p>
+            <p data-template="appVersion">Version:</p>
         </div>
     </footer>
 </body>
