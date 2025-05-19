@@ -11,7 +11,7 @@ use Framework\Traits\TemplateUtility;
  *
  * Controller for the home page and main functionality
  */
-class HomeController
+class ResumeController
 {
     use TemplateUtility;
     protected $app;
@@ -34,7 +34,7 @@ class HomeController
      */
     public function index(Request $request): Response
     {
-        $this->applyTemplate('home/index');
+        $this->applyTemplate('resume/index');
         //Somethin must be set to the Response body
         if(!$this->response->getContent()){
             $this->response->setBody("Home Page. No Template");
