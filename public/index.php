@@ -10,7 +10,7 @@ require_once __DIR__.'/../vendor/autoload.php';
 use Framework\Core\Application;
 
 // Create the application instance
-$app = new Application("../");
+$app = new Application("/replit");
 
 // Set environment and debug mode
 $config = $app->getContainer()->make('config');
