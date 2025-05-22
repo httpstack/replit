@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Application entry point.
  *
@@ -10,8 +11,18 @@ require_once __DIR__.'/../vendor/autoload.php';
 use Framework\Core\Application;
 
 // Create the application instance
-$app = new Application("/replit");
+$paths = [
+    'basePath' => __DIR__.'/..',
+    'appPath' => '/app',
+    'configPath' => '/config',
+    'routesPath' => '/routes',
+    'templatesPath' => '/templates',
+    'assetsPath' => '/assets',
+];
+$app = new Application($paths, true);
 
+$dm = $app->getContainer()->make('directoryMapper');
+debug($dm->getFiles("/var/www/html/replit/app"));
 // Set environment and debug mode
 $config = $app->getContainer()->make('config');
 

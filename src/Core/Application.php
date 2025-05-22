@@ -41,15 +41,25 @@ class Application
      * Whether the application is in debug mode.
      */
     protected bool $debug = false;
-
+    protected array $paths;
     /**
      * Create a new application instance.
      */
-    public function __construct(string $basePath)
+    public function __construct(array $paths = [], bool $debug = true)
     {
-        $this->basePath = rtrim($basePath, '/');
-        $this->container = new Container();
+        $this->paths = $paths? $paths : [
+            'basePath' => __DIR__.'/..',
+            'appPath' => '/app',
+            'configPath' => '/config',
+            'routesPath' => '/routes',
+            'templatesPath' => '/templates',
+            'assetsPath' => '/assets',
+        ];
+        $this->showErrors($this->debug);
 
+        $this->basePath = rtrim($this->paths['basePath'], '/');
+        $this->container = new Container();
+        //dd($this->basePath);
         // Register the application in the container
         $this->container->instance('app', $this);
         $this->container->instance(self::class, $this);
@@ -64,8 +74,22 @@ class Application
         // Register service providers
         $this->registerProviders();
         $this->registerTemplateServices();
+        $this->setGlobal();
     }
-
+    protected function setGlobal():void{
+        $GLOBALS['app'] = $this;
+    }
+    protected function showErrors(bool $debug): void
+    {
+        if ($debug) {
+            ini_set('display_errors', '1');
+            ini_set('display_startup_errors', '1');
+            error_reporting(E_ALL);
+        } else {
+            ini_set('display_errors', '0');
+            ini_set('display_startup_errors', '0');
+        }
+    }
     /**
      * Register core services in the container.
      */
@@ -99,24 +123,28 @@ class Application
         // Register the file loader
         $this->container->singleton('fileLoader', function () {
             $fileLoader = new FileLoader();
-            $fileLoader->mapDirectory('app', $this->appPath());
-            $fileLoader->mapDirectory('config', $this->configPath());
-            $fileLoader->mapDirectory('routes', $this->routesPath());
-            $fileLoader->mapDirectory('templates', $this->templatesPath());
-            $fileLoader->mapDirectory('assets', $this->assetsPath());
-
+            foreach($this->paths as $key => $path){
+                $shortKey = str_replace('Path', '', $key);
+                if($shortKey === 'base'){
+                    continue;
+                }
+                debug($this->paths['basePath'].$path);
+                $fileLoader->mapDirectory($shortKey, $this->paths['basePath'].$path);
+            }
             return $fileLoader;
         });
 
         // Register the directory mapper
         $this->container->singleton('directoryMapper', function () {
-            return new DirectoryMapper([
-                'app' => $this->appPath(),
-                'config' => $this->configPath(),
-                'routes' => $this->routesPath(),
-                'templates' => $this->templatesPath(),
-                'assets' => $this->assetsPath(),
-            ]);
+            $paths = [];
+            foreach ($this->paths as $key => $path) {
+                $shortKey = str_replace('Path', '', $key);
+                if ($shortKey === 'base') {
+                    continue;
+                }
+                $paths[$shortKey] = $this->basePath.$path;
+            }
+            return new DirectoryMapper($paths);
         });
 
         // Register the config service
@@ -258,7 +286,10 @@ class Application
     {
         $this->debug = $debug;
     }
-
+    public function getDebug(): bool
+    {
+        return $this->debug;
+    }
     /**
      * Get the application container.
      */
@@ -272,7 +303,7 @@ class Application
      */
     public function appPath(): string
     {
-        return $this->basePath.'/app';
+        return $this->basePath.$this->paths['appPath'];
     }
 
     /**
@@ -280,7 +311,7 @@ class Application
      */
     public function configPath(): string
     {
-        return $this->basePath.'/config';
+        return $this->basePath.$this->paths['configPath'];
     }
 
     /**
@@ -288,7 +319,7 @@ class Application
      */
     public function routesPath(string $file = ''): string
     {
-        return $this->basePath.'/routes'.($file ? '/'.$file : '');
+        return $this->basePath.$this->paths['routesPath'].($file ? '/'.$file : '');
     }
 
     /**
@@ -296,11 +327,11 @@ class Application
      */
     public function templatesPath(): string
     {
-        return $this->basePath.'/templates';
+        return $this->basePath.$this->paths['templatesPath'];
     }
 
     public function assetsPath(): string
     {
-        return $this->basePath.'/assets';
+        return $this->basePath.$this->paths['assetsPath'];
     }
 }

@@ -17,11 +17,10 @@ class TemplateMiddleware
     {
         // Constructor logic if needed
         // ho 'Executing TemplateMiddleware constructor'.PHP_EOL;
-        global $app;
-        $this->app = $app;
+        $this->app = app();
         // $this->app->registerTemplateServices();
 
-        $this->container = $app->getContainer();
+        $this->container = $this->app->getContainer();
         $this->template = $this->container->make('template');
         $this->config = $this->container->make('config')['template'];
 

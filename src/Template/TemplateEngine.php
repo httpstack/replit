@@ -70,6 +70,7 @@ class TemplateEngine extends \DOMDocument
         $body = $this->getElementsByTagName('body')->item(0);
         foreach ($assets as $asset) {
             $assetPath = $this->basePath.$asset['filePath'];
+            //debug($asset['filePath']);
             if (pathinfo($assetPath)['extension'] === 'css') {
                 $link = $this->createElement('link');
                 $link->setAttribute('rel', 'stylesheet');

@@ -2,7 +2,7 @@
 
 use Framework\Core\Application;
 use Framework\Http\Response;
-
+//echo app()->getContainer()->make('app')->debug;
 /*
  * Helper Functions
  *
@@ -24,7 +24,22 @@ if (!function_exists('app')) {
         return $GLOBALS['app']->getContainer()->make($abstract);
     }
 }
-
+if(!function_exists('debug')){
+    /**
+     * Dump and die.
+     *
+     * @param mixed ...$args
+     */
+    function debug($string): void
+    {
+        $debug = app('app')->getDebug();
+        if ($debug) {
+            echo '<pre>';
+            var_dump($string);
+            echo '</pre>';
+        }
+    }
+}
 if (!function_exists('config')) {
     /**
      * Get a configuration value.
