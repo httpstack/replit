@@ -62,6 +62,11 @@ class BaseModel
         return $this;
     }
 
+    public function loadJsonData(string $file){
+        $fileLoader = $this->container->make('fileLoader');
+        $jsonData = $fileLoader->parseJsonFile($file);
+        $this->fill($jsonData);
+    }
     /**
      * Determine if the given attribute can be filled.
      */

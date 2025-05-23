@@ -231,7 +231,21 @@ class FileLoader
 
         return require $path;
     }
+    public function parseJsonFile(string $path): array
+    {
+        if(is_file($path)){
+            $content = file_get_contents($path);
+            $data = json_decode($content, true);
 
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new FrameworkException("Failed to parse JSON file: {$path}");
+            }
+
+            return $data;
+        } else {
+            throw new FrameworkException("File not found: {$path}");
+        }
+    }
     /**
      * Include a PHP file.
      *

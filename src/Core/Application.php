@@ -40,32 +40,25 @@ class Application
     /**
      * Whether the application is in debug mode.
      */
-    protected bool $debug = false;
+    protected bool $debug = true;
     protected array $paths;
     /**
      * Create a new application instance.
      */
-    public function __construct(array $paths = [], bool $debug = true)
-    {
-        $this->paths = $paths? $paths : [
-            'basePath' => __DIR__.'/..',
-            'appPath' => '/app',
-            'configPath' => '/config',
-            'routesPath' => '/routes',
-            'templatesPath' => '/templates',
-            'assetsPath' => '/assets',
-        ];
+    public function __construct(string $configPath, bool $debug = true)
+    {        
         $this->showErrors($this->debug);
-
-        $this->basePath = rtrim($this->paths['basePath'], '/');
+        //REGISTER CONTAINER AND APP WITH THE CONTAINER
         $this->container = new Container();
-        //dd($this->basePath);
-        // Register the application in the container
+        $this->container->instance(Container::class, $this->container);
         $this->container->instance('app', $this);
         $this->container->instance(self::class, $this);
-        $this->container->instance(Container::class, $this->container);
+        //BIND config OPERATION TO CONTAINER
+        $this->bindConfig($configPath);
+        //REGISTER $this TO GLOBAL SCOPE
+        $this->setGlobal();
+        $this->paths = config($this->container,'app.paths');
 
-        // Register core services
         $this->registerCoreServices();
 
         // Register global middleware
@@ -75,7 +68,54 @@ class Application
         $this->registerProviders();
         $this->registerTemplateServices();
         $this->setGlobal();
+    }    //debug($this->paths);
+    protected function bindConfig(string $configPath): void
+    {
+        // Register the config service
+        $this->container->singleton('config', function () use ($configPath) {
+            
+            $config = [];
+
+            // Load all PHP files in the config directory
+            foreach (glob($configPath.'/*.php') as $file) {
+                $key = basename($file, '.php');
+                $config[$key] = require $file;
+            }
+
+            return $config;
+        });
     }
+
+    
+    /**
+     * Normalize a filesystem path: resolves .., ., duplicate slashes, and trims trailing slash (except root)
+     */
+    public static function normalizePath(string $path): string
+    {
+        // Replace backslashes with forward slashes
+        $path = str_replace('\\', '/', $path);
+        // Replace multiple slashes with a single slash
+        $path = preg_replace('#/+#', '/', $path);
+        // Resolve .. and .
+        $parts = [];
+        foreach (explode('/', $path) as $segment) {
+            if ($segment === '' || $segment === '.') continue;
+            if ($segment === '..') {
+                array_pop($parts);
+            } else {
+                $parts[] = $segment;
+            }
+        }
+        $normalized = (substr($path, 0, 1) === '/' ? '/' : '') . implode('/', $parts);
+        // Remove trailing slash unless it's root
+        if (strlen($normalized) > 1) {
+            $normalized = rtrim($normalized, '/');
+        }
+        return $normalized;
+    }
+    /**
+     * Get the base path of the application.
+     */
     protected function setGlobal():void{
         $GLOBALS['app'] = $this;
     }
@@ -124,12 +164,13 @@ class Application
         $this->container->singleton('fileLoader', function () {
             $fileLoader = new FileLoader();
             foreach($this->paths as $key => $path){
-                $shortKey = str_replace('Path', '', $key);
-                if($shortKey === 'base'){
-                    continue;
+                
+                if ($key !== 'base') {
+                    $path = $this->paths['base'].$path;
+                }else{
+                    $path = $this->paths['base'];
                 }
-                debug($this->paths['basePath'].$path);
-                $fileLoader->mapDirectory($shortKey, $this->paths['basePath'].$path);
+                $fileLoader->mapDirectory($key, $path);
             }
             return $fileLoader;
         });
@@ -138,28 +179,12 @@ class Application
         $this->container->singleton('directoryMapper', function () {
             $paths = [];
             foreach ($this->paths as $key => $path) {
-                $shortKey = str_replace('Path', '', $key);
-                if ($shortKey === 'base') {
-                    continue;
-                }
-                $paths[$shortKey] = $this->basePath.$path;
+                $paths[$key] = ($key === 'base') ? $this->paths['base'] : $this->paths['base'].$path;
             }
             return new DirectoryMapper($paths);
         });
 
-        // Register the config service
-        $this->container->singleton('config', function () {
-            $configPath = $this->configPath();
-            $config = [];
 
-            // Load all PHP files in the config directory
-            foreach (glob($configPath.'/*.php') as $file) {
-                $key = basename($file, '.php');
-                $config[$key] = require $file;
-            }
-
-            return $config;
-        });
     }
 
     /**
@@ -178,18 +203,19 @@ class Application
         // Register the template engine
         $this->container->singleton('template', function ($container) {
             $fileLoader = $container->make('fileLoader');
-
+            $baseTemplate = config($container, 'template.baseTemplate', 'layouts/base');
             return new TemplateEngine(
                 $fileLoader,
-                $this->templatesPath()
+                $this->templatesPath(),
+                $baseTemplate
             );
         });
 
         $this->container->singleton('templateModel', function () {
-            //GET TEMPLATE DATA KEY VALUES FROM CONFIG
-            $config = $this->container->make('config')['template'] ?? [];
+            $tm = new TemplateModel();
+            
             //INITIALIZE THE TEMPLATE MODEL WITH THESE VALUES
-            return new TemplateModel($config);
+            return new TemplateModel();
         });
     }
 
@@ -303,7 +329,7 @@ class Application
      */
     public function appPath(): string
     {
-        return $this->basePath.$this->paths['appPath'];
+        return $this->paths['base'].$this->paths['appPath'];
     }
 
     /**
@@ -311,7 +337,7 @@ class Application
      */
     public function configPath(): string
     {
-        return $this->basePath.$this->paths['configPath'];
+        return $this->paths['base'].$this->paths['config'];
     }
 
     /**
@@ -319,7 +345,7 @@ class Application
      */
     public function routesPath(string $file = ''): string
     {
-        return $this->basePath.$this->paths['routesPath'].($file ? '/'.$file : '');
+        return $this->paths['base'].$this->paths['routes'].($file ? '/'.$file : '');
     }
 
     /**
@@ -327,11 +353,19 @@ class Application
      */
     public function templatesPath(): string
     {
-        return $this->basePath.$this->paths['templatesPath'];
+        return $this->paths['base'].$this->paths['templates'];
     }
 
     public function assetsPath(): string
     {
-        return $this->basePath.$this->paths['assetsPath'];
+        return $this->paths['base'].$this->paths['assets'];
     }
+    public function basePath(): string
+    {
+        return $this->paths['base'];
+    }
+    public function getPaths(): array
+    {
+        return $this->paths;
+    }   
 }

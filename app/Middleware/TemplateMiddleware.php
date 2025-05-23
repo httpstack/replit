@@ -21,11 +21,13 @@ class TemplateMiddleware
         // $this->app->registerTemplateServices();
 
         $this->container = $this->app->getContainer();
-        $this->template = $this->container->make('template');
+        $this->template = $this->container->make('template',['container' => $this->container]);
+        // $this->template = $this->container->make('template');
         $this->config = $this->container->make('config')['template'];
 
         // $this->template->assign($this->config);
         $this->templateModel = $this->container->make('templateModel');
+        $this->templateModel->fill($this->config);
         // cho $this->templateModel->getAttribute('baseTemplate');
     }
 

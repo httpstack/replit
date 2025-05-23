@@ -2,6 +2,7 @@
 
 use Framework\Core\Application;
 use Framework\Http\Response;
+use Framework\Container\Container;
 //echo app()->getContainer()->make('app')->debug;
 /*
  * Helper Functions
@@ -44,11 +45,12 @@ if (!function_exists('config')) {
     /**
      * Get a configuration value.
      */
-    function config(string $key, $default = null)
+    function config(Container $container, string $key, $default = null)
     {
+        $key = "config.{$key}";
         list($file, $path) = explode('.', $key, 2) + [null, null];
 
-        $config = app()->getContainer()->make($file);
+        $config = $container->make($file);
 
         if ($path === null) {
             return $config;

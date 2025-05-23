@@ -2,10 +2,12 @@
 
 namespace Framework\Template;
 
+use Framework\Core\Application;
 use Framework\Exceptions\FrameworkException;
 use Framework\FileSystem\FileLoader;
 use Framework\Traits\DomUtility;
 use Framework\Model\BaseModel;
+use Framework\Container\Container;
 
 /**
  * Template Engine.
@@ -46,19 +48,22 @@ class TemplateEngine extends \DOMDocument
      * Template cache.
      */
     protected array $cache = [];
-    protected string $basePath;
-
+    protected string $baseUri;
+    protected Container $container;
     public function __construct(
         FileLoader $fileLoader,
         string $templateDir,
+        string $baseTemplate
     ) {
         parent::__construct('1.0', 'UTF-8');
-        $this->basePath = '/../replit';
+        $this->container = app()->getContainer();
+        $this->baseUri = config($this->container,'app.baseUri');
+        $this->templateDir = rtrim($templateDir, '/');
         $this->formatOutput = true;
         $this->preserveWhiteSpace = false;
         $this->registerNodeClass('DOMElement', \DOMElement::class);
         $this->fileLoader = $fileLoader;
-        $this->templateDir = rtrim($templateDir, '/');
+       
         $this->xpath = new \DOMXPath($this);
     }
 
@@ -69,7 +74,7 @@ class TemplateEngine extends \DOMDocument
         //  var_dump($head);
         $body = $this->getElementsByTagName('body')->item(0);
         foreach ($assets as $asset) {
-            $assetPath = $this->basePath.$asset['filePath'];
+            $assetPath = $this->baseUri.$asset['filePath'];
             //debug($asset['filePath']);
             if (pathinfo($assetPath)['extension'] === 'css') {
                 $link = $this->createElement('link');

@@ -8,6 +8,21 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | PATHS
+    |--------------------------------------------------------------------------
+    |THESE ARE ALL OF THE PATHS USED BY THE APPLICATION
+    */
+    'paths' => [
+    'base' =>DOC_ROOT,
+    'app' => '/app',
+    'config' => '/config',
+    'routes' => '/routes',
+    'templates' => '/templates',
+    'assets' => '/assets',
+    'data' => '/data',
+],
+    /*
+    |--------------------------------------------------------------------------
     | Application Name
     |--------------------------------------------------------------------------
     |
@@ -55,7 +70,7 @@ return [
     | You should set this to the root of your application.
     |
     */
-    'url' => 'http://localhost/replit/',
+    'baseUri' => 'http://localhost/replit/',
     
     /*
     |--------------------------------------------------------------------------

@@ -16,18 +16,18 @@ class TemplateModel extends BaseModel
     /**
      * Load metadata from the configuration file.
      */
-    public function __construct(protected string|array $config = [])
+    public function __construct()
     {
         // echo 'Executing TemplateModel constructor<br>'.PHP_EOL;
-        global $app;
-        $container = $app->getContainer();
         parent::__construct();
-
-        $this->loadMetadata($config);
-        $this->loadAssets($container->make('db'));
-        $this->loadLinks($container->make('db'));
+        $this->app = app();
+        $this->container = $this->app->getContainer();
+    
+        $this->loadJsonData($this->container->make('fileLoader')->findFile('base', null, 'json'));
+        // echo 'Loading metadata from config<br>'.PHP_EOL;
+        $this->loadAssets($this->container->make('db'));
+        $this->loadLinks($this->container->make('db')); 
     }
-
     public function loadMetadata(string|array $config): void
     {   
         global $app;

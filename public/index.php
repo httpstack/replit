@@ -5,26 +5,16 @@
  *
  * This file bootstraps the application and starts the request handling process.
  */
-
+define('DOC_ROOT', '/var/www/html/replit');
 require_once __DIR__.'/../vendor/autoload.php';
 
 use Framework\Core\Application;
 
 // Create the application instance
-$paths = [
-    'basePath' => __DIR__.'/..',
-    'appPath' => '/app',
-    'configPath' => '/config',
-    'routesPath' => '/routes',
-    'templatesPath' => '/templates',
-    'assetsPath' => '/assets',
-];
-$app = new Application($paths, true);
 
-$dm = $app->getContainer()->make('directoryMapper');
-debug($dm->getFiles("/var/www/html/replit/app"));
-// Set environment and debug mode
-$config = $app->getContainer()->make('config');
+$app = new Application(DOC_ROOT."/config", true);
+
+    
 
 // Load routes
 require_once $app->routesPath('web.php');

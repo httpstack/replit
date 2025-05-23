@@ -9,7 +9,7 @@ trait TemplateUtility
      */
     public function applyTemplate(string $view): void
     {
-        // var_dump($this->template->fileLoader->findFile('style.css', null, 'css')); // ;
+        //debug($this->template->fileLoader->findFile('style.css', null, 'css')); // ;
         $this->template->injectView($view, 'viewContent');
         $this->template->processData('template');
         $this->response->setBody($this->template->saveHTML());
