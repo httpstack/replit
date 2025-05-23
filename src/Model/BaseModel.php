@@ -2,6 +2,7 @@
 
 namespace Framework\Model;
 
+use Framework\Database\DatabaseConnection;
 use Framework\Exceptions\FrameworkException;
 
 /**
@@ -32,6 +33,7 @@ class BaseModel
      */
     protected array $rules = [];
 
+
     /**
      * Validation errors.
      */
@@ -45,7 +47,6 @@ class BaseModel
         $this->fill($attributes);
         $this->syncOriginal();
     }
-
     /**
      * Fill the model with an array of attributes.
      *

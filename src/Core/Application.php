@@ -53,11 +53,14 @@ class Application
         $this->container->instance(Container::class, $this->container);
         $this->container->instance('app', $this);
         $this->container->instance(self::class, $this);
+
         //BIND config OPERATION TO CONTAINER
+        //AND REGISTER IT GLOBALLY SO THE INSTANCE CAN SEE IT
         $this->bindConfig($configPath);
-        //REGISTER $this TO GLOBAL SCOPE
         $this->setGlobal();
-        $this->paths = config($this->container,'app.paths');
+
+        
+        $this->paths = $this->container->make('config')['app']['paths'];
 
         $this->registerCoreServices();
 
@@ -202,20 +205,20 @@ class Application
     {
         // Register the template engine
         $this->container->singleton('template', function ($container) {
+            //GET A DATA MODEL FOR THE TEMPLATE ENGINE
+            $templateModel = $container->make('templateModel');
+            //GET A FILE LOADER FOR THE TEMPLATE ENGINE
             $fileLoader = $container->make('fileLoader');
-            $baseTemplate = config($container, 'template.baseTemplate', 'layouts/base');
             return new TemplateEngine(
                 $fileLoader,
-                $this->templatesPath(),
-                $baseTemplate
+                $templateModel
             );
         });
 
         $this->container->singleton('templateModel', function () {
-            $tm = new TemplateModel();
-            
+            $db = $this->container->make('db');
             //INITIALIZE THE TEMPLATE MODEL WITH THESE VALUES
-            return new TemplateModel();
+            return new TemplateModel($db);
         });
     }
 

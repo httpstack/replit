@@ -22,13 +22,15 @@ class TemplateMiddleware
 
         $this->container = $this->app->getContainer();
         $this->template = $this->container->make('template',['container' => $this->container]);
-        // $this->template = $this->container->make('template');
-        $this->config = $this->container->make('config')['template'];
-
-        // $this->template->assign($this->config);
         $this->templateModel = $this->container->make('templateModel');
+        //LOAD THE CONFIGURATION FOR THE TEMPLATE
+        $this->config = $this->container->make('config')['template'];
+        //GET THE JSON REPLACEMENT DATA FILENAME
+        $baseData = $this->config['baseData'] ?? 'base';
+        $baseData = $this->container->make('fileLoader')->findFile($baseData, null, 'json');
+        $this->templateModel->loadJsonData($baseData);
+        //FILL THE DATA MODEL WITH THE CONFIGURATION
         $this->templateModel->fill($this->config);
-        // cho $this->templateModel->getAttribute('baseTemplate');
     }
 
     public function index(Request $request, callable $next): Response
@@ -54,18 +56,18 @@ class TemplateMiddleware
         //Get the file path to the $baseTemplate, the array of $assets and the mlti-dim array of $links
         $baseTemplate = $this->templateModel->getAttribute('baseTemplate');
         $assets = $this->templateModel->getAttribute('assets');
+        //USING THE DOM UTIL TRAITS, BUILD A NAVBAR WITH THEW LINKS ARRAY
         $links = $this->templateModel->getAttribute('links');
-
-        //PUSH THE TEMPLATES Data Model to the template engine
+        $links = "html navbar";
+        //ASSIGN GENERATED HTML TO THE REPLACEMENT DATA
+        $this->template->assign("links", $links);
         $this->template->assign($this->templateModel->getAttributes());
-        // Prepare the assets and the exp replacement vars
-        // echo method_exists($this->templateModel, 'getAttribute');
         $doc = $this->template->loadTemplate($baseTemplate, true);
 
         //APPEND THE THE GENERATED LINK / SCRIPT TAGS TO THE HEAD OR BODY
         //WITH DATASOURCE $assets
         $this->template->loadAssets($assets);
-
+        $this->template->processData("template");
         // Call the next middleware or handler
         $response = $next($request);
 

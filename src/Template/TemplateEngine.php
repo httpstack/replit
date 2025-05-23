@@ -2,6 +2,7 @@
 
 namespace Framework\Template;
 
+use App\Models\TemplateModel;
 use Framework\Core\Application;
 use Framework\Exceptions\FrameworkException;
 use Framework\FileSystem\FileLoader;
@@ -52,18 +53,19 @@ class TemplateEngine extends \DOMDocument
     protected Container $container;
     public function __construct(
         FileLoader $fileLoader,
-        string $templateDir,
-        string $baseTemplate
+        TemplateModel $templateModel
     ) {
         parent::__construct('1.0', 'UTF-8');
         $this->container = app()->getContainer();
-        $this->baseUri = config($this->container,'app.baseUri');
-        $this->templateDir = rtrim($templateDir, '/');
+        //SET THE TEMPLATE MODEL
+        $this->baseUri = $templateModel->getAttribute('baseUri');
+        $this->templateDir = $templateModel->getAttribute('templateDir');
         $this->formatOutput = true;
         $this->preserveWhiteSpace = false;
         $this->registerNodeClass('DOMElement', \DOMElement::class);
         $this->fileLoader = $fileLoader;
-       
+        //LOAD THE ENGINE WITH THE REPLACEMENT DATA FROM THE MODEL
+        $this->assign($templateModel->getAttributes());
         $this->xpath = new \DOMXPath($this);
     }
 
@@ -254,7 +256,17 @@ class TemplateEngine extends \DOMDocument
             }
         }
     }
+    public function processHandlebars()
+    {
+        // Get the current HTML as text
+        $content = $this->saveHTML();
 
+        // Replace all {{ key }} placeholders with their values
+        $content = $this->processVariables($content);
+
+        // Load the processed HTML back into the DOMDocument instance
+        $this->loadHTML($content);
+    }
     public function processData(string $level)
     {
         $selector = "[data-$level]";
@@ -267,7 +279,12 @@ class TemplateEngine extends \DOMDocument
             }
             foreach ($this->variables as $key => $val) {
                 if ($key === $dataKey) {
-                    $element->textContent = $val;
+                    if(!is_array($val)){
+                       $element->textContent = $val; 
+                    }else{
+                        $element->textContent = "array";
+                    }
+                    
                     $element->removeAttribute("data-$level");
                     break;
                 }

@@ -34,7 +34,14 @@ class HomeController
      */
     public function index(Request $request): Response
     {
-        $this->applyTemplate('home/index');
+        $view = "home/index";
+        $this->template->assign("mykey", "myvalue");
+        $this->template->assign("title", "Home");
+        $this->template->injectView($view, 'viewContent');
+        //$this->template->processData('template');
+        $this->template->processHandlebars();
+        $this->response->setBody($this->template->saveHTML());
+        //$this->applyTemplate('home/index');
         //Somethin must be set to the Response body
         if(!$this->response->getContent()){
             $this->response->setBody("Home Page. No Template");

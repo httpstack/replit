@@ -12,52 +12,61 @@ use Framework\Model\BaseModel;
  */
 class TemplateModel extends BaseModel
 {
- 
+        /**
+     * The database connection instance.
+     * The $queries array is used to store the queries that are executed
+     * during the lifecycle of the model. This can be useful for debugging
+     * or logging purposes.
+     */
+    protected DatabaseConnection $db;
+    protected array $queries = [];
     /**
      * Load metadata from the configuration file.
      */
-    public function __construct()
+    public function __construct(DatabaseConnection $db)
     {
         // echo 'Executing TemplateModel constructor<br>'.PHP_EOL;
         parent::__construct();
         $this->app = app();
+        $this->setDB($db);
         $this->container = $this->app->getContainer();
-    
-        $this->loadJsonData($this->container->make('fileLoader')->findFile('base', null, 'json'));
+        $fileLoader = $this->container->make('fileLoader');
+        $baseTemplate = $this->container->make('config')['template']['baseTemplate'] ?? 'layouts/base';
+        //$baseTemplate = $fileLoader->findFile($baseTemplate, null, 'php');
         // echo 'Loading metadata from config<br>'.PHP_EOL;
-        $this->loadAssets($this->container->make('db'));
-        $this->loadLinks($this->container->make('db')); 
+        $baseUri = $this->container->make('config')['app']['baseUri'];
+        $this->setAttribute('baseTemplate', $baseTemplate);
+        $this->setAttribute('templateDir', $this->app->templatesPath());
+        $this->setAttribute('baseUri', $baseUri);
+        $this->loadAssets($this->db);
+        $this->loadLinks($this->db); 
     }
-    public function loadMetadata(string|array $config): void
-    {   
-        global $app;
-        // echo 'Loading metadata from config<br>'.PHP_EOL;
-        if (is_string($config)) {
-            $container = $app->getContainer();
-            $fileLoader = $container->make('fileLoader');
-            $config = $fileLoader->includeFile($config);
-        } 
-        // echo 'Loading metadata from config<br>'.PHP_EOL;
-        // var_dump(value: $configData);
-        $this->fill($config);
+    protected function setDB(DatabaseConnection $db): void
+    {
+        $this->db = $db;
     }
+    public function addQuery(string $key, string $query): void
+    {
+        $this->queries[$key] = $query;
+    }
+
 
     /**
      * Fetch assets from the database.
      */
-    public function loadAssets(DatabaseConnection $db): void
+    public function loadAssets(): void
     {
         $query = 'SELECT filePath FROM assets ORDER BY `priority` DESC';
-        $this->setAttribute('assets', $db->select($query));
+        $this->setAttribute('assets', $this->db->select($query));
     }
 
     /**
      * Fetch navigation links from the database.
      */
-    public function loadLinks(DatabaseConnection $db): void
+    public function loadLinks(): void
     {
         $query = 'SELECT uri, icon, label FROM nav_links WHERE enabled = 1 ORDER BY type, id';
-        $this->setAttribute('links', $db->select($query));
+        $this->setAttribute('links', $this->db->select($query));
     }
 
     /**
