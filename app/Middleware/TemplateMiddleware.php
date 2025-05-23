@@ -22,15 +22,17 @@ class TemplateMiddleware
 
         $this->container = $this->app->getContainer();
         $this->template = $this->container->make('template',['container' => $this->container]);
-        $this->templateModel = $this->container->make('templateModel');
-        //LOAD THE CONFIGURATION FOR THE TEMPLATE
+        $this->templateModel = $this->template->templateModel;
+
+        //GET THE CONFIGURATION FOR THE TEMPLATE AND LOADINTO MODEL
         $this->config = $this->container->make('config')['template'];
-        //GET THE JSON REPLACEMENT DATA FILENAME
+        $this->templateModel->fill($this->config);
+
+        //GET THE JSON REPLACEMENT DATA AND LOAD INTO MODEL
         $baseData = $this->config['baseData'] ?? 'base';
         $baseData = $this->container->make('fileLoader')->findFile($baseData, null, 'json');
         $this->templateModel->loadJsonData($baseData);
-        //FILL THE DATA MODEL WITH THE CONFIGURATION
-        $this->templateModel->fill($this->config);
+        
     }
 
     public function index(Request $request, callable $next): Response
@@ -58,16 +60,28 @@ class TemplateMiddleware
         $assets = $this->templateModel->getAttribute('assets');
         //USING THE DOM UTIL TRAITS, BUILD A NAVBAR WITH THEW LINKS ARRAY
         $links = $this->templateModel->getAttribute('links');
-        $links = "html navbar";
+        $html = "<ul>";
+        foreach($links as $index => $link){
+            if($link['type'] === 'main')
+            {
+                $uri = $link["uri"];
+                $label = $link['label'];
+                $html .= "<li><a href='$uri'>$label</a></li>";           
+            }
+        }
+        $html .= "</ul>";
+        $links = $html;
         //ASSIGN GENERATED HTML TO THE REPLACEMENT DATA
-        $this->template->assign("links", $links);
         $this->template->assign($this->templateModel->getAttributes());
-        $doc = $this->template->loadTemplate($baseTemplate, true);
 
+        $doc = $this->template->loadTemplate($baseTemplate, true);
+       // debug(array_keys($this->template->getVars()));
         //APPEND THE THE GENERATED LINK / SCRIPT TAGS TO THE HEAD OR BODY
-        //WITH DATASOURCE $assets
+
         $this->template->loadAssets($assets);
+        $this->template->assign("links", $links);
         $this->template->processData("template");
+    
         // Call the next middleware or handler
         $response = $next($request);
 

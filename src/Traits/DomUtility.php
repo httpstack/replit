@@ -108,7 +108,10 @@ trait DomUtility
         
         return $result;
     }
-    
+    public function isHTML(string $string): bool
+    {
+        return $string !== strip_tags($string);
+    }
     /**
      * Save the document as HTML
      * 

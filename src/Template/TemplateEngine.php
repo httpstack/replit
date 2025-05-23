@@ -51,24 +51,29 @@ class TemplateEngine extends \DOMDocument
     protected array $cache = [];
     protected string $baseUri;
     protected Container $container;
+    public TemplateModel $templateModel;
     public function __construct(
         FileLoader $fileLoader,
         TemplateModel $templateModel
     ) {
         parent::__construct('1.0', 'UTF-8');
+        $this->templateModel = $templateModel;
         $this->container = app()->getContainer();
         //SET THE TEMPLATE MODEL
-        $this->baseUri = $templateModel->getAttribute('baseUri');
-        $this->templateDir = $templateModel->getAttribute('templateDir');
+        $this->baseUri = $this->templateModel->getAttribute('baseUri');
+        $this->templateDir = $this->templateModel->getAttribute('templateDir');
         $this->formatOutput = true;
         $this->preserveWhiteSpace = false;
         $this->registerNodeClass('DOMElement', \DOMElement::class);
         $this->fileLoader = $fileLoader;
         //LOAD THE ENGINE WITH THE REPLACEMENT DATA FROM THE MODEL
-        $this->assign($templateModel->getAttributes());
+        $this->setDataModel($this->templateModel);
+        //debug($templateModel->getAttributes());
         $this->xpath = new \DOMXPath($this);
     }
-
+    public function getVars(){
+        return $this->variables;
+    }
     public function loadAssets($assets)
     {
         $this->xpath = new \DOMXPath($this);
@@ -94,7 +99,7 @@ class TemplateEngine extends \DOMDocument
             }
         }
     }
-    public function setDataModel(BaseModel $model): void
+    public function setDataModel(TemplateModel $model): void
     {
         $this->variables = array_merge($this->variables, $model->getAttributes());
     }
@@ -107,12 +112,14 @@ class TemplateEngine extends \DOMDocument
      */
     public function assign($key, $value = null): self
     {
+        //MAKE SURE THE VALUES ARE STRINGS ONLY
         if (is_array($key)) {
             $this->variables = array_merge($this->variables, $key);
         } else {
-            $this->variables[$key] = $value;
+            if(is_string($value)){
+               $this->variables[$key] = $value; 
+            }
         }
-
         return $this;
     }
 
@@ -279,10 +286,16 @@ class TemplateEngine extends \DOMDocument
             }
             foreach ($this->variables as $key => $val) {
                 if ($key === $dataKey) {
-                    if(!is_array($val)){
-                       $element->textContent = $val; 
+                    if(is_array($val)){
+                       $element->textContent = $key; 
                     }else{
-                        $element->textContent = "array";
+                        if($this->isHTML($val)){
+                            $fragment = $this->createDocumentFragment();
+                            $fragment->appendXML($val);
+                            $element->appendChild($fragment);
+                        }else{
+                           $element->textContent = $val; 
+                        }
                     }
                     
                     $element->removeAttribute("data-$level");

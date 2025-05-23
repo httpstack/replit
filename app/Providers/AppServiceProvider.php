@@ -47,14 +47,6 @@ class AppServiceProvider extends ServiceProvider
         // Perform bootstrapping tasks
         
         // For example, set default template variables
-        if ($this->container->has('template')) {
-            $template = $this->container->make('template');
-            
-            $template->assign([
-                'appName' => config('app.name', 'Custom MVC Framework'),
-                'appVersion' => config('app.version', '1.0.0'),
-                'year' => date('Y'),
-            ]);
-        }
+
     }
 }

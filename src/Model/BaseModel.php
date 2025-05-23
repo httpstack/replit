@@ -55,9 +55,7 @@ class BaseModel
     public function fill(array $attributes): self
     {
         foreach ($attributes as $key => $value) {
-            if ($this->isFillable($key)) {
-                $this->setAttribute($key, $value);
-            }
+            $this->setAttribute($key, $value);
         }
 
         return $this;

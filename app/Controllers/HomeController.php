@@ -39,6 +39,7 @@ class HomeController
         $this->template->assign("title", "Home");
         $this->template->injectView($view, 'viewContent');
         //$this->template->processData('template');
+        //echo $this->template->getVars()['links'];
         $this->template->processHandlebars();
         $this->response->setBody($this->template->saveHTML());
         //$this->applyTemplate('home/index');

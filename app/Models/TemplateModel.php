@@ -30,7 +30,6 @@ class TemplateModel extends BaseModel
         $this->app = app();
         $this->setDB($db);
         $this->container = $this->app->getContainer();
-        $fileLoader = $this->container->make('fileLoader');
         $baseTemplate = $this->container->make('config')['template']['baseTemplate'] ?? 'layouts/base';
         //$baseTemplate = $fileLoader->findFile($baseTemplate, null, 'php');
         // echo 'Loading metadata from config<br>'.PHP_EOL;
@@ -40,6 +39,7 @@ class TemplateModel extends BaseModel
         $this->setAttribute('baseUri', $baseUri);
         $this->loadAssets($this->db);
         $this->loadLinks($this->db); 
+        //debug($this->getAttribute("links"));
     }
     protected function setDB(DatabaseConnection $db): void
     {
@@ -65,7 +65,7 @@ class TemplateModel extends BaseModel
      */
     public function loadLinks(): void
     {
-        $query = 'SELECT uri, icon, label FROM nav_links WHERE enabled = 1 ORDER BY type, id';
+        $query = 'SELECT uri, icon, label, type FROM nav_links WHERE enabled = 1 ORDER BY type, id';
         $this->setAttribute('links', $this->db->select($query));
     }
 
