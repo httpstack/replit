@@ -30,14 +30,21 @@ class ResumeController
     }
 
     /**
-     * Display the home page.
+     * Display the Resume page.
      */
     public function index(Request $request): Response
     {
-        $this->applyTemplate('resume/index');
+        $view = "resume/index";
+        $this->template->assign("mykey", "myvalue");
+        $this->template->assign("title", "Resume");
+        $this->template->injectView($view, 'viewContent');
+        //$this->template->processData('template');
+        //echo $this->template->getVars()['links'];
+        $this->template->processHandlebars();
+        $this->response->setBody($this->template->saveHTML());
         //Somethin must be set to the Response body
         if(!$this->response->getContent()){
-            $this->response->setBody("Home Page. No Template");
+            $this->response->setBody("Resume Page. No Template");
         }
         return $this->response;
     }

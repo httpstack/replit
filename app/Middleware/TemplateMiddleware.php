@@ -60,13 +60,14 @@ class TemplateMiddleware
         $assets = $this->templateModel->getAttribute('assets');
         //USING THE DOM UTIL TRAITS, BUILD A NAVBAR WITH THEW LINKS ARRAY
         $links = $this->templateModel->getAttribute('links');
+        $baseUri = $this->templateModel->getAttribute("baseUri");
         $html = "<ul>";
         foreach($links as $index => $link){
             if($link['type'] === 'main')
             {
                 $uri = $link["uri"];
                 $label = $link['label'];
-                $html .= "<li><a href='$uri'>$label</a></li>";           
+                $html .= "<li><a href='$baseUri.$uri'>$label</a></li>";           
             }
         }
         $html .= "</ul>";
